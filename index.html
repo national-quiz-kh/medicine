@@ -50,7 +50,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Firebase SDK សម្រាប់ជាស្ពានចម្លងទិន្នន័យ (Relay Bridge) -->
+    <!-- Firebase SDK សម្រាប់ជាស្ពានចម្លងទិន្នន័យស្វ័យប្រវត្តិនៅខាងក្រោយ (Invisible Relay Bridge) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -193,7 +193,6 @@
       }
 
       #logoutBtn { position: fixed; top: 4px; right: 12px; background: #ef4444; color: #fff; padding: 5px 12px; border-radius: 6px; border: 0; cursor: pointer; display: none; z-index: 2000; font-size: 13px; font-weight: bold; }
-      #syncBridgeBtn { position: fixed; top: 4px; right: 85px; background: #0284c7; color: #fff; padding: 5px 12px; border-radius: 6px; border: 0; cursor: pointer; display: none; z-index: 2000; font-size: 13px; font-weight: bold; }
       #waitingBox { display: none; position: fixed; top: 18px; left: 50%; transform: translateX(-50%); background: #f3f4f6; padding: 10px 14px; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); z-index: 2000; }
 
       .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 3000; }
@@ -248,7 +247,6 @@
   <div class="home-mini"></div>
   <a class="home-main" href="#">Home 🏡</a>
   <button id="fullscreenBtn"><i class="fa-solid fa-expand"></i> Full Screen</button>
-  <button id="syncBridgeBtn" onclick="openSyncModal()" title="ផ្ទេរផែនការសិក្សាទៅឧបករណ៍ផ្សេង"><i class="fa-solid fa-cloud-arrow-up"></i> ផ្ទេរទិន្នន័យ</button>
   <button id="logoutBtn">Logout</button>
 
   <!-- LOGIN SECTION -->
@@ -271,7 +269,7 @@
       <div id="msg"></div>
 
       <div class="mt-3 text-center text-slate-500 text-xs leading-snug">
-        <div>One Account one device (ជាមួយប្រព័ន្ធផ្ទេរផែនការសិក្សាស្វ័យប្រវត្តិ)</div>
+        <div>One Account one device</div>
         <span class="block text-emerald-700 font-bold my-1.5">ជូនពរលោកគ្រូ អ្នកគ្រូពេទ្យទាំងអស់ជោគជ័យក្នុងការប្រឡង</span>
         <div class="text-black mt-1.5">
           <p>(សូមកុំផ្តល់លេខសំងាត់របស់អ្នកដល់អ្នកដទៃ ពុំនោះទេអ្នកមិនអាច Login ចូលគណនេយ្យរបស់អ្នកបានទេ។)</p>
@@ -302,7 +300,7 @@
     </div>
   </div>
 
-  <div id="waitingBox">Waiting for account owner to approve & syncing study plan...</div>
+  <div id="waitingBox">Waiting for account owner to approve...</div>
   <div id="approvalOverlay" style="display:none"></div>
 
   <!-- ========================================================= -->
@@ -347,7 +345,6 @@
                     <h1 class="hidden md:block text-2xl md:text-3xl font-bold text-emerald-700 mb-1">កម្មវិធីត្រៀមប្រឡងថ្នាក់ជាតិ - វេជ្ជសាស្ត្រទូទៅ (General Medicine)</h1>
                     <p class="text-slate-500 text-sm md:text-base mb-4">ជ្រើសរើសមុខវិជ្ជាខាងក្រោម (Basic, Medicine, Surgery, Gyneco, Pediatric)</p>
 
-                    <!-- ប៊ូតុងជ្រើសរើសផ្នែកសំណួរតាមឈ្មោះមុខវិជ្ជា -->
                     <div class="flex flex-wrap justify-center gap-2 mb-2 w-full">
                         <button onclick="switchModule('Basic')" id="mod-Basic" class="module-btn flex-1 min-w-[100px] py-2 px-3 bg-white border border-slate-300 rounded-md text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm active">Basic</button>
                         <button onclick="switchModule('Medicine')" id="mod-Medicine" class="module-btn flex-1 min-w-[100px] py-2 px-3 bg-white border border-slate-300 rounded-md text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm">Medicine</button>
@@ -447,18 +444,13 @@
                     </div>
                 </div>
 
-                <!-- 4. Study Plan Section (មុខងារកំណត់ផែនការរៀនសូត្រថ្មី) -->
+                <!-- 4. Study Plan Section -->
                 <div id="section-plan" class="bg-white p-6 rounded-b-lg shadow-sm hidden">
-                    <div class="border-b pb-4 mb-6 flex flex-wrap justify-between items-center gap-4">
-                        <div>
-                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                <i class="fa-solid fa-bullseye text-rose-500"></i> ការកំណត់ផែនការរៀនសូត្រ (Study Planner)
-                            </h2>
-                            <p class="text-sm text-slate-500 mt-1">កំណត់កាលបរិច្ឆេទប្រឡង ឬចំនួនថ្ងៃ ដើម្បីគណនាចំនួនសំណួរត្រូវធ្វើប្រចាំថ្ងៃ និងចំនួនដងត្រូវ Repeat ឲ្យបានអត្រាត្រូវ ១០០%</p>
-                        </div>
-                        <button onclick="pushDataToFirebaseBridge(true)" class="bg-sky-600 hover:bg-sky-700 text-white text-xs md:text-sm font-bold py-2 px-4 rounded-lg shadow flex items-center gap-2">
-                            <i class="fa-solid fa-rotate"></i> ផ្ញើផែនការទៅឧបករណ៍ថ្មី (Firebase Bridge)
-                        </button>
+                    <div class="border-b pb-4 mb-6">
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-bullseye text-rose-500"></i> ការកំណត់ផែនការរៀនសូត្រ (Study Planner)
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">កំណត់កាលបរិច្ឆេទប្រឡង ឬចំនួនថ្ងៃ ដើម្បីគណនាចំនួនសំណួរត្រូវធ្វើប្រចាំថ្ងៃ និងចំនួនដងត្រូវ Repeat ឲ្យបានអត្រាត្រូវ ១០០%</p>
                     </div>
 
                     <!-- Form កំណត់ផែនការ -->
@@ -522,7 +514,6 @@
                             </div>
                         </div>
 
-                        <!-- ដំបូន្មានឆ្លាតវៃ (Smart Repeat Advisor) -->
                         <div class="bg-amber-50/80 border-l-4 border-amber-500 p-4 rounded-r-xl shadow-sm">
                             <h4 class="font-bold text-amber-900 text-sm md:text-base flex items-center gap-2 mb-1">
                                 <i class="fa-solid fa-lightbulb text-amber-600"></i> ដំបូន្មានដើម្បីទទួលបានអត្រាធ្វើត្រូវ ១០០% (Smart Repeat Recommendation)៖
@@ -532,7 +523,6 @@
                             </div>
                         </div>
 
-                        <!-- តារាងតាមដានតាមមុខវិជ្ជាទាំង ៥ -->
                         <div class="border rounded-xl overflow-hidden shadow-sm">
                             <div class="bg-slate-100 px-4 py-3 border-b font-bold text-slate-800 text-sm">
                                 វឌ្ឍនភាពតាមផ្នែក និងចំនួនដងដែលត្រូវ Repeat បន្ថែម
@@ -561,8 +551,11 @@
   </div>
 
 
-  <!-- ========================================================= -->
-  <!-- QUIZ MODALS (Settings, Resume, Confirm, Sync Bridge)      -->
+
+
+
+    <!-- ========================================================= -->
+  <!-- QUIZ MODALS (Settings, Resume, Confirm)                   -->
   <!-- ========================================================= -->
   <div id="modal-settings" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center z-[3000] p-4">
       <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
@@ -647,30 +640,6 @@
       </div>
   </div>
 
-  <!-- Modal សម្រាប់ស្ពានចម្លងទិន្នន័យ Firebase (Relay Bridge) -->
-  <div id="modal-sync" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center z-[3000] p-4">
-      <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
-          <div class="flex justify-between items-center border-b pb-3 mb-4">
-              <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
-                  <i class="fa-solid fa-cloud-arrow-up text-sky-600"></i> ស្ពានចម្លងទិន្នន័យ (Firebase Relay)
-              </h3>
-              <button onclick="closeSyncModal()" class="text-slate-400 hover:text-slate-700 bg-slate-200 rounded px-2 py-0.5">&times;</button>
-          </div>
-          <p class="text-xs text-slate-600 leading-relaxed mb-4">
-              មុខងារនេះប្រើប្រាស់ Firebase ត្រឹមជា <strong>ស្ពានចម្លងបណ្ដោះអាសន្ន</strong> ប៉ុណ្ណោះ។ នៅពេលឧបករណ៍ថ្មីរបស់អ្នក Login ឬចុចទទួលយកទិន្នន័យរួច ទិន្នន័យនៅលើ Cloud នឹងត្រូវលុបចោលដោយស្វ័យប្រវត្តិ 100%។
-          </p>
-          <div class="flex flex-col gap-3">
-              <button onclick="pushDataToFirebaseBridge(true)" class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-2.5 px-4 rounded-lg text-sm flex items-center justify-center gap-2 shadow">
-                  <i class="fa-solid fa-upload"></i> បញ្ជូនទិន្នន័យពីឧបករណ៍នេះទៅស្ពាន (Send)
-              </button>
-              <button onclick="pullDataFromFirebaseBridge(true)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-lg text-sm flex items-center justify-center gap-2 shadow">
-                  <i class="fa-solid fa-download"></i> ទាញយកទិន្នន័យពីស្ពានចូលឧបករណ៍នេះ (Receive & Delete Cloud)
-              </button>
-          </div>
-          <div id="sync-status-msg" class="text-center text-xs font-bold mt-4 min-h-[18px]"></div>
-      </div>
-  </div>
-
   <!-- INSTALL BANNER -->
   <div id="pwaBanner" class="pwa-install-banner">
     <div class="flex items-center gap-3 flex-1">
@@ -707,100 +676,92 @@ setInterval(function() {
 }, 1000);
 
 /* ========================================================= */
-/* ផ្នែកទី ០៖ FIREBASE EPHEMERAL RELAY BRIDGE CONFIG           */
+/* ផ្នែកទី ០៖ FIREBASE AUTOMATIC EPHEMERAL RELAY BRIDGE       */
 /* ========================================================= */
-// <--- ដាក់ Firebase Config របស់អ្នកនៅទីនេះ --->
 const FIREBASE_CONFIG = {
-  apiKey: "YOUR_FIREBASE_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyBRBq2im8gaYhp-4w8vxWFIqCYdvGiaUgk",
+  authDomain: "gm-quiz-bridge.firebaseapp.com",
+  databaseURL: "https://gm-quiz-bridge-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "gm-quiz-bridge",
+  storageBucket: "gm-quiz-bridge.firebasestorage.app",
+  messagingSenderId: "537295742796",
+  appId: "1:537295742796:web:f86858097670621b06d1e9"
 };
 
 let firebaseDb = null;
+let syncDebounceTimer = null;
+
 try {
-  if (FIREBASE_CONFIG.apiKey !== "YOUR_FIREBASE_API_KEY") {
+  if (!firebase.apps.length) {
     firebase.initializeApp(FIREBASE_CONFIG);
-    firebaseDb = firebase.database();
   }
+  firebaseDb = firebase.database();
 } catch (err) {
-  console.warn("Firebase Bridge not configured yet:", err);
+  console.warn("Firebase Bridge initialization error:", err);
 }
 
 function sanitizeFirebaseKey(key) {
-  return (key || "guest").replace(/[.#$\[\]\s]/g, "_");
+  return String(key || "guest").trim().toLowerCase().replace(/[.#$\[\]\s\/]/g, "_");
 }
 
-// បញ្ជូនទិន្នន័យផែនការសិក្សា និងវឌ្ឍនភាពទៅកាន់ស្ពាន Firebase បណ្ដោះអាសន្ន
-async function pushDataToFirebaseBridge(showAlert = false) {
-  const user = currentUsername || localStorage.getItem("last_logged_user");
-  if (!user) return;
-  const statusEl = document.getElementById("sync-status-msg");
-  if (!firebaseDb) {
-    if (showAlert) alert("សូមដាក់តម្លៃ FIREBASE_CONFIG នៅក្នុងកូដ index.html ជាមុនសិន!");
-    return;
-  }
-  try {
-    if (statusEl) { statusEl.style.color = "#0284c7"; statusEl.innerText = "កំពុងបញ្ជូនទិន្នន័យទៅស្ពាន..."; }
-    const payload = {
-      timestamp: Date.now(),
-      settings: localStorage.getItem(STORAGE_KEY_SETTINGS),
-      state: localStorage.getItem(STORAGE_KEY_STATE),
-      plan: localStorage.getItem(STORAGE_KEY_PLAN)
-    };
-    await firebaseDb.ref("sync_bridge/" + sanitizeFirebaseKey(user)).set(payload);
-    if (statusEl) { statusEl.style.color = "#059669"; statusEl.innerText = "✓ បានដាក់ទិន្នន័យលើស្ពានរួចរាល់! សូម Login នៅឧបករណ៍ថ្មីដើម្បីទទួល។"; }
-    if (showAlert && document.getElementById("modal-sync").classList.contains("hidden")) {
-      alert("បានបញ្ជូនផែនការសិក្សាទៅកាន់ស្ពានចម្លងរួចរាល់! នៅពេលអ្នក Login លើឧបករណ៍ថ្មី ទិន្នន័យនឹងត្រូវផ្ទេរចូលឧបករណ៍ថ្មី ហើយលុបចេញពី Cloud ស្វ័យប្រវត្តិ។");
-    }
-  } catch (e) {
-    if (statusEl) { statusEl.style.color = "#dc2626"; statusEl.innerText = "មានបញ្ហាក្នុងការបញ្ជូនទិន្នន័យ!"; }
-  }
+function getUserStorageKeys(username) {
+  const cleanUser = sanitizeFirebaseKey(username || currentUsername || localStorage.getItem("last_logged_user") || "default");
+  return {
+    settings: `gmExam_settings_${cleanUser}`,
+    state: `gmExam_state_${cleanUser}`,
+    plan: `gmExam_plan_${cleanUser}`
+  };
 }
 
-// ទាញយកទិន្នន័យពីស្ពាន Firebase មកដាក់ក្នុងឧបករណ៍ថ្មី រួចលុបចេញពី Cloud ភ្លាមៗ (មិនផ្ទុកទុកក្នុង Cloud)
-async function pullDataFromFirebaseBridge(showAlert = false) {
+// បញ្ជូនទិន្នន័យដោយស្វ័យប្រវត្តិទៅកាន់ស្ពាន Firebase (ដើម្បីត្រៀមផ្ទេរពេលគណនីដដែល Login លើឧបករណ៍ផ្សេង)
+async function pushDataToFirebaseBridge() {
   const user = currentUsername || localStorage.getItem("last_logged_user");
   if (!user || !firebaseDb) return;
-  const statusEl = document.getElementById("sync-status-msg");
   try {
-    if (statusEl) { statusEl.style.color = "#0284c7"; statusEl.innerText = "កំពុងពិនិត្យទិន្នន័យលើស្ពាន..."; }
+    const keys = getUserStorageKeys(user);
+    const payload = {
+      timestamp: Date.now(),
+      deviceId: getDeviceId(),
+      settings: localStorage.getItem(keys.settings) || null,
+      state: localStorage.getItem(keys.state) || null,
+      plan: localStorage.getItem(keys.plan) || null
+    };
+    if (!payload.settings && !payload.state && !payload.plan) return;
+    await firebaseDb.ref("sync_bridge/" + sanitizeFirebaseKey(user)).set(payload);
+  } catch (e) {
+    console.warn("Auto-bridge push skipped:", e);
+  }
+}
+
+function scheduleAutoBridgePush() {
+  if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+  syncDebounceTimer = setTimeout(() => {
+    pushDataToFirebaseBridge();
+  }, 1200);
+}
+
+// ទាញយកទិន្នន័យដោយស្វ័យប្រវត្តិនៅពេល Login ចូលឧបករណ៍ថ្មី រួចលុបចេញពី Firebase ភ្លាមៗ (មិនផ្ទុកទុកក្នុង Cloud)
+async function pullDataFromFirebaseBridgeAndClean() {
+  const user = currentUsername || localStorage.getItem("last_logged_user");
+  if (!user || !firebaseDb) return false;
+  try {
     const bridgeRef = firebaseDb.ref("sync_bridge/" + sanitizeFirebaseKey(user));
     const snapshot = await bridgeRef.get();
     if (snapshot.exists()) {
       const data = snapshot.val();
-      if (data.settings) localStorage.setItem(STORAGE_KEY_SETTINGS, data.settings);
-      if (data.state) localStorage.setItem(STORAGE_KEY_STATE, data.state);
-      if (data.plan) localStorage.setItem(STORAGE_KEY_PLAN, data.plan);
+      const keys = getUserStorageKeys(user);
+      if (data.settings) localStorage.setItem(keys.settings, data.settings);
+      if (data.state) localStorage.setItem(keys.state, data.state);
+      if (data.plan) localStorage.setItem(keys.plan, data.plan);
 
-      // លុបទិន្នន័យចេញពី Firebase ភ្លាមៗបន្ទាប់ពីចម្លងចូល Device រួចរាល់
+      // លុបទិន្នន័យចេញពី Firebase Cloud ភ្លាមៗបន្ទាប់ពីផ្ទេរចូល Device រួចរាល់
       await bridgeRef.remove();
-
-      if (window.allModulesData) {
-        loadAppState();
-        loadSettings();
-        loadStudyPlan();
-        switchTab(appState.activeTab);
-      }
-      if (statusEl) { statusEl.style.color = "#059669"; statusEl.innerText = "✓ ទទួលបានទិន្នន័យ និងបានលុបពី Cloud រួចរាល់!"; }
-      if (showAlert) alert("ទទួលបានផែនការសិក្សាពីឧបករណ៍ចាស់ជោគជ័យ ហើយទិន្នន័យលើស្ពាន Cloud ត្រូវបានលុបចោលរួចរាល់!");
-    } else {
-      if (statusEl) { statusEl.style.color = "#64748b"; statusEl.innerText = "មិនមានទិន្នន័យរង់ចាំការផ្ទេរនៅលើស្ពានទេ។"; }
+      return true;
     }
   } catch (e) {
-    if (statusEl) { statusEl.style.color = "#dc2626"; statusEl.innerText = "មិនអាចទាញយកទិន្នន័យបានទេ!"; }
+    console.warn("Auto-bridge pull error:", e);
   }
-}
-
-function openSyncModal() {
-  document.getElementById("sync-status-msg").innerText = "";
-  document.getElementById("modal-sync").classList.remove("hidden");
-}
-function closeSyncModal() {
-  document.getElementById("modal-sync").classList.add("hidden");
+  return false;
 }
 
 /* ========================================================= */
@@ -860,6 +821,7 @@ function sendLogoutRequestToBackend() {
 }
 
 window.addEventListener("beforeunload", () => {
+  pushDataToFirebaseBridge();
   if (!localStorage.getItem("stay_user")) {
     sendLogoutRequestToBackend();
     localStorage.removeItem("session_token");
@@ -869,7 +831,8 @@ window.addEventListener("beforeunload", () => {
   }
 });
 
-function forceLocalLogout(reasonMsg) {
+async function forceLocalLogout(reasonMsg) {
+  await pushDataToFirebaseBridge();
   sendLogoutRequestToBackend();
   localStorage.removeItem("session_token");
   localStorage.removeItem("stay_user");
@@ -882,12 +845,10 @@ function forceLocalLogout(reasonMsg) {
   document.getElementById("modal-settings").classList.add("hidden");
   document.getElementById("modal-resume").classList.add("hidden");
   document.getElementById("modal-confirm").classList.add("hidden");
-  document.getElementById("modal-sync").classList.add("hidden");
 
   document.getElementById("viewer").style.display = "none";
   document.getElementById("login-container").style.display = "flex";
   document.getElementById("logoutBtn").style.display = "none";
-  document.getElementById("syncBridgeBtn").style.display = "none";
   
   if (reasonMsg) {
     showMsg(reasonMsg);
@@ -912,16 +873,17 @@ function loadQuestionsFromJSAndInitQuiz() {
   document.body.appendChild(script);
 }
 
-function enterViewer() {
+async function enterViewer() {
   document.getElementById("login-container").style.display = "none";
   document.getElementById("viewer").style.display = "block";
   document.getElementById("logoutBtn").style.display = "inline-block";
-  document.getElementById("syncBridgeBtn").style.display = "inline-block";
   
+  // ១. ទាញយកទិន្នន័យផែនការសិក្សាពីស្ពាន Firebase ចូលឧបករណ៍នេះដោយស្វ័យប្រវត្តិ រួចលុបពី Cloud មុនពេលបើក Quiz
+  await pullDataFromFirebaseBridgeAndClean();
+
+  // ២. ដំណើរការកម្មវិធី Quiz ជាមួយទិន្នន័យដែលទើបទទួលបាន
   loadQuestionsFromJSAndInitQuiz();
   showWelcomeProfile(currentUsername);
-  // ពិនិត្យ និងទាញយកទិន្នន័យផែនការសិក្សាពីស្ពាន Firebase ដោយស្វ័យប្រវត្តិ រួចលុបពី Cloud
-  pullDataFromFirebaseBridge(false);
 }
 
 (function tryAutoLogin() {
@@ -975,7 +937,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     
     updateActivityTime();
     currentUsername = username;
-    enterViewer();
+    await enterViewer();
     startFirstDevicePolling();
     return;
   }
@@ -990,9 +952,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   showMsg(result.message || "Login failed.");
 });
 
-document.getElementById("logoutBtn").addEventListener("click", async () => {
-  // រុញទិន្នន័យចុងក្រោយទៅស្ពាន មុនពេលចាកចេញ
-  await pushDataToFirebaseBridge(false);
+document.getElementById("logoutBtn").addEventListener("click", () => {
   forceLocalLogout("អ្នកបានចាកចេញពីប្រព័ន្ធដោយជោគជ័យ។");
 });
 
@@ -1017,7 +977,7 @@ function startSecondDeviceRetry() {
       else localStorage.removeItem("stay_user");
       updateActivityTime();
       currentUsername = lastLoginAttempt.username;
-      enterViewer();
+      await enterViewer();
       startFirstDevicePolling();
     } else if (r.isDeclined) {
       stopSecondDeviceRetry();
@@ -1086,7 +1046,7 @@ function showApprovalPopup(username, requestId, deviceInfo) {
         <h3 style="color:#ef4444;">តើនេះជាអ្នកមែនទេ?</h3>
         ${infoHtml}
         <div class="controls">
-          <button class="btn-allow" id="allowBtn">ជាខ្ញុំ (អនុញ្ញាត & ផ្ទេរផែនការសិក្សា)</button>
+          <button class="btn-allow" id="allowBtn">ជាខ្ញុំ</button>
           <button class="btn-decline" id="declineBtn">មិនមែនជាខ្ញុំទេ</button>
         </div>
       </div>
@@ -1095,9 +1055,9 @@ function showApprovalPopup(username, requestId, deviceInfo) {
   overlay.style.display = "block";
 
   document.getElementById("allowBtn").onclick = async () => {
-    // ១. បញ្ជូនទិន្នន័យផែនការសិក្សាពីឧបករណ៍ទី១ ទៅកាន់ស្ពាន Firebase មុនពេលផ្ទេរសិទ្ធិ
-    await pushDataToFirebaseBridge(false);
-    // ២. អនុញ្ញាតឲ្យឧបករណ៍ទី២ ចូលប្រើប្រាស់
+    // ១. បញ្ជូនទិន្នន័យផែនការសិក្សាពីឧបករណ៍ទី១ ទៅស្ពាន Firebase មុនពេលអនុញ្ញាតឲ្យឧបករណ៍ទី២ ចូល
+    await pushDataToFirebaseBridge();
+    // ២. អនុញ្ញាតឲ្យឧបករណ៍ទី២ Login ចូល (ឧបករណ៍ទី២ នឹងទាញយកទិន្នន័យហើយលុបពី Cloud ភ្លាមៗ)
     await fetch(BACKEND + "/approve", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1105,7 +1065,7 @@ function showApprovalPopup(username, requestId, deviceInfo) {
     });
     overlay.style.display = "none";
     approvalShownForRequest = null;
-    forceLocalLogout("អ្នកបានអនុញ្ញាតឲ្យឧបករណ៍ថ្មីចូលប្រើ និងបានផ្ទេរផែនការសិក្សារួចរាល់។");
+    forceLocalLogout("អ្នកបានអនុញ្ញាតឲ្យឧបករណ៍ថ្មីចូលប្រើ។ គណនីរបស់អ្នកនៅលើឧបករណ៍នេះត្រូវបានកាត់ផ្តាច់។");
   };
 
   document.getElementById("declineBtn").onclick = async () => {
@@ -1166,16 +1126,12 @@ let studyPlan = {
     totalDays: 30,
     targetRepeats: 4,
     createdAt: null,
-    dailyLog: {} // កត់ត្រាចំនួនសំណួរដែលបានធ្វើតាមថ្ងៃនីមួយៗ (YYYY-MM-DD: count)
+    dailyLog: {}
 };
 
 let quizState = appState.moduleData['Basic'];
-const STORAGE_KEY_SETTINGS = 'gmExam_settings_v1';
-const STORAGE_KEY_STATE = 'gmExam_state_v1';
-const STORAGE_KEY_PLAN = 'gmExam_plan_v1';
 let autoNextTimeout = null;
 
-// មុខងារបម្លែងទម្រង់សំណួរឲ្យគាំទ្រទាំងទម្រង់ចាស់ (correct/incorrect) និងទម្រង់ថ្មី (options/answer)
 function normalizeQuestionItem(q) {
     if (q.correct !== undefined && Array.isArray(q.incorrect)) {
         return q;
@@ -1337,8 +1293,11 @@ function checkResumeOrRestart() {
 }
 
 function loadSettings() {
-    const saved = localStorage.getItem(STORAGE_KEY_SETTINGS);
-    if (saved) appSettings = {...appSettings, ...JSON.parse(saved)};
+    const keys = getUserStorageKeys();
+    const saved = localStorage.getItem(keys.settings);
+    if (saved) {
+        try { appSettings = {...appSettings, ...JSON.parse(saved)}; } catch(e) {}
+    }
     if(appSettings.rangeEnd > currentModuleData.length || appSettings.rangeEnd === 100) {
         appSettings.rangeEnd = currentModuleData.length || 1;
     }
@@ -1372,7 +1331,9 @@ function saveSettings() {
     appSettings.shuffleAnswers = document.getElementById('setting-shuffle-a').checked;
     appSettings.autoNext = document.getElementById('setting-auto-next').checked;
     
-    localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(appSettings));
+    const keys = getUserStorageKeys();
+    localStorage.setItem(keys.settings, JSON.stringify(appSettings));
+    scheduleAutoBridgePush();
     return true;
 }
 
@@ -1395,11 +1356,14 @@ function closeSettingsAndRestartIfChanged() {
 
 function saveAppState() {
     updateActivityTime();
-    localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(appState));
+    const keys = getUserStorageKeys();
+    localStorage.setItem(keys.state, JSON.stringify(appState));
+    scheduleAutoBridgePush();
 }
 
 function loadAppState() {
-    const saved = localStorage.getItem(STORAGE_KEY_STATE);
+    const keys = getUserStorageKeys();
+    const saved = localStorage.getItem(keys.state);
     if (saved) {
         try {
             const parsed = JSON.parse(saved);
@@ -1989,7 +1953,8 @@ function getTodayKey() {
 }
 
 function loadStudyPlan() {
-    const saved = localStorage.getItem(STORAGE_KEY_PLAN);
+    const keys = getUserStorageKeys();
+    const saved = localStorage.getItem(keys.plan);
     if (saved) {
         try { studyPlan = { ...studyPlan, ...JSON.parse(saved) }; } catch (e) {}
     }
@@ -2007,7 +1972,9 @@ function loadStudyPlan() {
 }
 
 function saveStudyPlan() {
-    localStorage.setItem(STORAGE_KEY_PLAN, JSON.stringify(studyPlan));
+    const keys = getUserStorageKeys();
+    localStorage.setItem(keys.plan, JSON.stringify(studyPlan));
+    scheduleAutoBridgePush();
 }
 
 function togglePlanInputType() {
@@ -2068,7 +2035,6 @@ function getModuleStats(modKey) {
     const accuracy = answered > 0 ? Math.round((correct / answered) * 100) : 0;
     const rounds = mState.roundsCompleted || 0;
 
-    // គណនាដំបូន្មានចំនួនដងត្រូវ Repeat ដើម្បីឈានដល់អត្រាធ្វើត្រូវ ១០០%
     let neededRepeats = 0;
     if (answered === 0) neededRepeats = studyPlan.targetRepeats || 4;
     else if (accuracy < 50) neededRepeats = 4;
@@ -2105,7 +2071,6 @@ function calculateAndSaveStudyPlan() {
     saveStudyPlan();
     renderStudyPlanDashboard();
     updateTopStudyBanner();
-    pushDataToFirebaseBridge(false);
 }
 
 function renderStudyPlanDashboard() {
@@ -2113,7 +2078,6 @@ function renderStudyPlanDashboard() {
     const totalPool = (window.allModulesData && window.allModulesData['ALL']) ? window.allModulesData['ALL'].length : 0;
     const targetRepeats = studyPlan.targetRepeats || 4;
 
-    // គណនាចំនួនសំណួរសរុបគុណនឹងចំនួនជុំដែលត្រូវ Repeat ចែកនឹងចំនួនថ្ងៃនៅសល់
     const totalQuestionsWithRepeats = totalPool * targetRepeats;
     const dailyTarget = daysLeft > 0 ? Math.ceil(totalQuestionsWithRepeats / daysLeft) : totalQuestionsWithRepeats;
     const dailyFirstPass = daysLeft > 0 ? Math.ceil(totalPool / daysLeft) : totalPool;
