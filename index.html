@@ -1095,16 +1095,28 @@ const MODULE_KEYS = ['Basic', 'Medicine', 'Surgery', 'Gyneco', 'Pediatric'];
 let currentModuleData = [];
 let currentModuleName = 'Basic';
 
+// ការកំណត់ (Settings) ឥឡូវនេះរក្សាទុកតាមមុខវិជ្ជានីមួយៗ ដើម្បីកុំឲ្យបាត់ពេលប្តូរមុខវិជ្ជា
 let appSettings = {
     shuffleQuestions: true,
     shuffleAnswers: true,
     autoNext: false,
     rangeStart: 1,
-    rangeEnd: 100
+    rangeEnd: 100,
+    perModuleRange: {} 
 };
 
 function createEmptyModuleObj() {
-    return { mode: 'quiz', questions: [], currentIndex: 0, score: 0, hasAnsweredCurrent: false, checklistProgress: {}, gameProgress: {}, roundsCompleted: 0 };
+    return { 
+        mode: 'quiz', 
+        questions: [], 
+        currentIndex: 0, 
+        score: 0, 
+        hasAnsweredCurrent: false, 
+        checklistProgress: {}, 
+        gameProgress: {}, 
+        roundsCompleted: 0,
+        needsResumePrompt: false 
+    };
 }
 
 let appState = {
@@ -1176,11 +1188,28 @@ function prepareAllModulesData() {
 
 function initQuizApplication() {
     prepareAllModulesData();
-    currentModuleData = window.allModulesData['Basic'] || [];
-    loadAppState();
     loadSettings();
+    loadAppState();
     loadStudyPlan();
+    
+    // ប្រសិនបើមានទិន្នន័យប្រឡងចាស់ដែលទើបផ្ទេរមក ឬមិនទាន់ចប់ ឲ្យលោតសួរ Resume នៅពេលចូលប្រឡង
+    for (const mod in appState.moduleData) {
+        if (hasUnfinishedSession(appState.moduleData[mod])) {
+            appState.moduleData[mod].needsResumePrompt = true;
+        }
+    }
+    
     switchTab(appState.activeTab);
+}
+
+// អនុគមន៍ពិនិត្យមើលថាតើមុខវិជ្ជានេះមានសំណួរកំពុងធ្វើមិនទាន់ចប់ឬអត់
+function hasUnfinishedSession(mState) {
+    if (!mState || !Array.isArray(mState.questions) || mState.questions.length === 0) return false;
+    const gameAnsCount = Object.keys(mState.gameProgress || {}).length;
+    const chkAnsCount = Object.keys(mState.checklistProgress || {}).length;
+    const isGameIncomplete = (mState.currentIndex > 0 || gameAnsCount > 0) && mState.currentIndex < mState.questions.length;
+    const isChkIncomplete = chkAnsCount > 0 && chkAnsCount < mState.questions.length;
+    return isGameIncomplete || isChkIncomplete;
 }
 
 function toggleSidebar() {
@@ -1209,6 +1238,19 @@ function toggleQuizNote() {
     if (el) el.classList.toggle('hidden');
 }
 
+function applyModuleSavedRange(moduleName) {
+    const maxLen = (window.allModulesData && window.allModulesData[moduleName]) ? window.allModulesData[moduleName].length : 1;
+    if (!appSettings.perModuleRange) appSettings.perModuleRange = {};
+    const savedRange = appSettings.perModuleRange[moduleName];
+    if (savedRange && savedRange.start >= 1 && savedRange.end <= maxLen && savedRange.start <= savedRange.end) {
+        appSettings.rangeStart = savedRange.start;
+        appSettings.rangeEnd = savedRange.end;
+    } else {
+        appSettings.rangeStart = 1;
+        appSettings.rangeEnd = maxLen || 1;
+    }
+}
+
 function switchModule(moduleName) {
     if (!window.allModulesData) return;
     currentModuleName = moduleName;
@@ -1217,6 +1259,11 @@ function switchModule(moduleName) {
     if (!appState.moduleData[moduleName]) appState.moduleData[moduleName] = createEmptyModuleObj();
     quizState = appState.moduleData[moduleName];
 
+    // បើមុខវិជ្ជាដែលប្តូរទៅមានសំណួរធ្វើមិនទាន់ចប់ ឲ្យវាលោតសួរ Resume
+    if (hasUnfinishedSession(quizState)) {
+        quizState.needsResumePrompt = true;
+    }
+
     document.querySelectorAll('.module-btn').forEach(btn => btn.classList.remove('active'));
     const modBtn = document.getElementById(`mod-${moduleName}`);
     if (modBtn) modBtn.classList.add('active');
@@ -1224,8 +1271,9 @@ function switchModule(moduleName) {
     let displayTitle = moduleName === 'ALL' ? 'មេរៀនរួមទាំងអស់ (All General Medicine)' : `មេរៀនផ្នែក ${moduleName}`;
     document.getElementById('lesson-title').innerText = displayTitle;
 
-    appSettings.rangeEnd = currentModuleData.length || 1;
-    appSettings.rangeStart = 1;
+    // ទាញយក Range ដែលធ្លាប់បានកំណត់សម្រាប់មុខវិជ្ជានេះ (មិនលុបត្រឡប់ទៅ 1 វិញទេ)
+    applyModuleSavedRange(moduleName);
+    updateSettingsUI();
     
     saveAppState();
     switchTab(appState.activeTab);
@@ -1233,6 +1281,12 @@ function switchModule(moduleName) {
 
 function switchTab(tab) {
     if (!window.allModulesData) return;
+    
+    // ប្រសិនបើចាកចេញពីផ្ទាំង Quiz ឬ Checklist ទៅមើលមេរៀន/ផែនការ ហើយមានសំណួរធ្វើមិនទាន់ចប់ កំណត់ឲ្យលោតសួរ Resume ពេលត្រឡប់មកវិញ
+    if ((tab === 'lesson' || tab === 'plan') && hasUnfinishedSession(quizState)) {
+        quizState.needsResumePrompt = true;
+    }
+
     appState.activeTab = tab;
     saveAppState();
 
@@ -1256,16 +1310,22 @@ function switchTab(tab) {
         renderLessonMode();
         renderTracker();
     } else if (tab === 'quiz') {
-        if(quizState.mode !== 'quiz' || quizState.questions.length === 0) {
-            quizState.mode = 'quiz';
-            checkResumeOrRestart();
+        quizState.mode = 'quiz';
+        if (!quizState.questions || quizState.questions.length === 0) {
+            forceRestart();
+        } else if (quizState.needsResumePrompt && hasUnfinishedSession(quizState)) {
+            renderQuiz();
+            document.getElementById('modal-resume').classList.remove('hidden');
         } else {
             renderQuiz();
         }
     } else if (tab === 'checklist') {
-        if(quizState.mode !== 'checklist' || quizState.questions.length === 0) {
-            quizState.mode = 'checklist';
-            checkResumeOrRestart();
+        quizState.mode = 'checklist';
+        if (!quizState.questions || quizState.questions.length === 0) {
+            forceRestart();
+        } else if (quizState.needsResumePrompt && hasUnfinishedSession(quizState)) {
+            renderChecklist();
+            document.getElementById('modal-resume').classList.remove('hidden');
         } else {
             renderChecklist();
         }
@@ -1276,36 +1336,17 @@ function switchTab(tab) {
     updateTopStudyBanner();
 }
 
-function checkResumeOrRestart() {
-    if (quizState.questions && quizState.questions.length > 0) {
-        let hasProgress = false;
-        if (quizState.mode === 'quiz' && quizState.currentIndex > 0 && quizState.currentIndex < quizState.questions.length) {
-            hasProgress = true;
-        } else if (quizState.mode === 'checklist' && Object.keys(quizState.checklistProgress || {}).length > 0) {
-            hasProgress = true;
-        }
-        if (hasProgress) {
-            document.getElementById('modal-resume').classList.remove('hidden');
-            return;
-        }
-    }
-    forceRestart();
-}
-
 function loadSettings() {
     const keys = getUserStorageKeys();
     const saved = localStorage.getItem(keys.settings);
     if (saved) {
         try { appSettings = {...appSettings, ...JSON.parse(saved)}; } catch(e) {}
     }
-    if(appSettings.rangeEnd > currentModuleData.length || appSettings.rangeEnd === 100) {
-        appSettings.rangeEnd = currentModuleData.length || 1;
-    }
-    if(appSettings.rangeStart < 1) appSettings.rangeStart = 1;
-    updateSettingsUI();
+    if (!appSettings.perModuleRange) appSettings.perModuleRange = {};
 }
 
 function updateSettingsUI() {
+    if (!currentModuleData) return;
     document.getElementById('total-q-count').innerText = currentModuleData.length;
     document.getElementById('setting-shuffle-q').checked = appSettings.shuffleQuestions;
     document.getElementById('setting-shuffle-a').checked = appSettings.shuffleAnswers;
@@ -1327,6 +1368,9 @@ function saveSettings() {
 
     appSettings.rangeStart = start;
     appSettings.rangeEnd = end;
+    if (!appSettings.perModuleRange) appSettings.perModuleRange = {};
+    appSettings.perModuleRange[currentModuleName] = { start: start, end: end };
+
     appSettings.shuffleQuestions = document.getElementById('setting-shuffle-q').checked;
     appSettings.shuffleAnswers = document.getElementById('setting-shuffle-a').checked;
     appSettings.autoNext = document.getElementById('setting-auto-next').checked;
@@ -1388,7 +1432,9 @@ function loadAppState() {
     
     let displayTitle = currentModuleName === 'ALL' ? 'មេរៀនរួមទាំងអស់ (All General Medicine)' : `មេរៀនផ្នែក ${currentModuleName}`;
     document.getElementById('lesson-title').innerText = displayTitle;
-    appSettings.rangeEnd = currentModuleData.length || 1;
+    
+    applyModuleSavedRange(currentModuleName);
+    updateSettingsUI();
 }
 
 function generateQuizData() {
@@ -1434,7 +1480,8 @@ function forceRestart(isNextRound = false) {
         mode: currentMode,
         checklistProgress: {},
         gameProgress: {},
-        roundsCompleted: isNextRound ? prevRounds + 1 : prevRounds
+        roundsCompleted: isNextRound ? prevRounds + 1 : prevRounds,
+        needsResumePrompt: false
     };
     quizState = appState.moduleData[currentModuleName];
     saveAppState();
@@ -1444,6 +1491,8 @@ function forceRestart(isNextRound = false) {
 }
 
 function resumeSession() {
+    quizState.needsResumePrompt = false;
+    saveAppState();
     document.getElementById('modal-resume').classList.add('hidden');
     if(quizState.mode === 'quiz') renderQuiz();
     else renderChecklist();
@@ -1549,7 +1598,6 @@ function renderTracker() {
 
 function renderQuiz() {
     if(autoNextTimeout) clearTimeout(autoNextTimeout);
-    document.getElementById('modal-resume').classList.add('hidden');
 
     const activeArea = document.getElementById('quiz-active-area');
     const completedArea = document.getElementById('quiz-completed-area');
@@ -1703,6 +1751,7 @@ function submitAnswer() {
     }
 
     quizState.hasAnsweredCurrent = true;
+    quizState.needsResumePrompt = false;
     const isCorrect = selected.value === 'true';
     const selectedText = selected.getAttribute('data-text');
     const currentQ = quizState.questions[quizState.currentIndex];
@@ -1757,13 +1806,13 @@ function nextQuestion() {
     quizState.hasAnsweredCurrent = false;
     if (quizState.questions && quizState.currentIndex === quizState.questions.length) {
         quizState.roundsCompleted = (quizState.roundsCompleted || 0) + 1;
+        quizState.needsResumePrompt = false;
     }
     saveAppState();
     renderQuiz();
 }
 
 function renderChecklist() {
-    document.getElementById('modal-resume').classList.add('hidden');
     const container = document.getElementById('checklist-container');
     container.innerHTML = '';
     if(!quizState.checklistProgress) quizState.checklistProgress = {};
@@ -1892,6 +1941,7 @@ function checkChecklistAnswer(questionId) {
         return;
     }
 
+    quizState.needsResumePrompt = false;
     const isCorrect = selected.value === 'true';
     const selectedText = selected.getAttribute('data-text');
     const qObj = quizState.questions.find(item => item.id === questionId);
@@ -1937,6 +1987,7 @@ function updateChecklistTracker() {
     document.getElementById('checklist-tracker').innerText = `បញ្ចប់: ${answered}/${total}`;
     if(total > 0 && answered === total) {
         quizState.roundsCompleted = (quizState.roundsCompleted || 0) + 1;
+        quizState.needsResumePrompt = false;
         saveAppState();
         document.getElementById('checklist-completed-message').classList.remove('hidden');
     } else {
