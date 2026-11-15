@@ -44,7 +44,7 @@
 
     <meta property="og:title" content="National General Medicine Quiz">
     <meta property="og:description" content="ព្យាយាម ធ្វើតេស្តសាកល្បង និងហ្វឹកហាត់ការចងចាំរបស់អ្នកឲ្យកាន់តែឆាប់ចាំ (General Medicine).">
-    <meta property="og:image" content="https://raw.githubusercontent.com/national-quiz-kh/medicine/refs/heads/main/MD%20Picture%20Crawling.png">
+    <meta property="og:image" content="https://github.com/national-quiz-kh/midwifery/blob/main/web%20crawling.png?raw=true">
 
     <link rel="icon" href="https://raw.githubusercontent.com/chamroeunchet-blip/icon/refs/heads/main/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -418,11 +418,19 @@
                         </div>
                     </div>
 
+                    <!-- ផ្ទាំងបញ្ចប់ការប្រឡងក្នុង Game Mode រួមជាមួយប៊ូតុង លទ្ធផល -->
                     <div id="quiz-completed-area" class="hidden text-center py-10">
                         <h2 class="text-3xl font-bold text-slate-800 mb-2">ការប្រឡងបានបញ្ចប់!</h2>
                         <div class="text-5xl font-bold text-emerald-600 my-6" id="final-score-text"></div>
                         <p id="round-completion-msg" class="text-slate-600 mb-6 font-bold"></p>
-                        <button onclick="forceRestart(true)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-lg shadow-md">ធ្វើតេស្តជុំបន្ទាប់ (Repeat Round)</button>
+                        <div class="flex flex-wrap justify-center gap-4">
+                            <button id="btn-show-results-quiz" onclick="openWrongAnswersPage('quiz')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-8 rounded-lg shadow-md flex items-center gap-2">
+                                <i class="fa-solid fa-clipboard-check"></i> លទ្ធផល (ពិនិត្យសំណួរខុស)
+                            </button>
+                            <button onclick="forceRestart(true)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-lg shadow-md">
+                                ធ្វើតេស្តជុំបន្ទាប់ (Repeat Round)
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -440,7 +448,15 @@
                     </div>
                     <div id="checklist-container" class="space-y-8"></div>
                     <div id="checklist-completed-message" class="hidden text-center py-8 mt-8 border-t border-slate-200 bg-emerald-50 rounded-lg">
-                        <h3 class="text-2xl font-bold text-emerald-600">អបអរសាទរ! អ្នកបានពិនិត្យគ្រប់សំណួរហើយ។</h3>
+                        <h3 class="text-2xl font-bold text-emerald-600 mb-4">អបអរសាទរ! អ្នកបានពិនិត្យគ្រប់សំណួរហើយ។</h3>
+                        <div class="flex flex-wrap justify-center gap-4">
+                            <button onclick="openWrongAnswersPage('checklist')" class="bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-md flex items-center gap-2">
+                                <i class="fa-solid fa-clipboard-check"></i> លទ្ធផល (ពិនិត្យសំណួរខុស)
+                            </button>
+                            <button onclick="forceRestart(true)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-md">
+                                ធ្វើតេស្តជុំបន្ទាប់ (Repeat Round)
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -453,7 +469,6 @@
                         <p class="text-sm text-slate-500 mt-1">កំណត់កាលបរិច្ឆេទប្រឡង ឬចំនួនថ្ងៃ ដើម្បីគណនាចំនួនសំណួរត្រូវធ្វើប្រចាំថ្ងៃ និងចំនួនដងត្រូវ Repeat ឲ្យបានអត្រាត្រូវ ១០០%</p>
                     </div>
 
-                    <!-- Form កំណត់ផែនការ -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-5 rounded-xl border border-slate-200 mb-6">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">១. ជ្រើសរើសរបៀបកំណត់ថ្ងៃ៖</label>
@@ -489,7 +504,6 @@
                         </div>
                     </div>
 
-                    <!-- ផ្ទាំងបង្ហាញលទ្ធផលផែនការ និងដំបូន្មាន -->
                     <div id="plan-dashboard" class="space-y-6">
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-center">
@@ -550,12 +564,8 @@
     </div>
   </div>
 
-
-
-
-
-    <!-- ========================================================= -->
-  <!-- QUIZ MODALS (Settings, Resume, Confirm)                   -->
+  <!-- ========================================================= -->
+  <!-- QUIZ MODALS (Settings, Resume, Confirm, Wrong Results)    -->
   <!-- ========================================================= -->
   <div id="modal-settings" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center z-[3000] p-4">
       <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
@@ -640,6 +650,48 @@
       </div>
   </div>
 
+  <!-- FULL PAGE MODAL: ផ្ទាំងលទ្ធផលបង្ហាញសំណួរដែលឆ្លើយខុស និងប្រវត្តិធ្វើត្រូវ/ខុស -->
+  <div id="modal-wrong-results" class="hidden fixed inset-0 bg-slate-100 z-[3500] flex flex-col overflow-hidden">
+      <div class="bg-white border-b border-slate-200 px-4 md:px-8 py-4 flex justify-between items-center shadow-sm shrink-0">
+          <div>
+              <h2 class="text-lg md:text-2xl font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-file-circle-xmark text-rose-600"></i> លទ្ធផលផ្ទៀងផ្ទាត់សំណួរដែលឆ្លើយខុស
+              </h2>
+              <p id="wrong-page-subtitle" class="text-xs md:text-sm text-slate-500 mt-0.5"></p>
+          </div>
+          <button onclick="closeWrongAnswersPage()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-4 py-2 rounded-lg text-sm flex items-center gap-2">
+              <i class="fa-solid fa-arrow-left"></i> ត្រឡប់ក្រោយ
+          </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8">
+          <div class="max-w-4xl mx-auto">
+              <div id="wrong-summary-banner" class="grid grid-cols-3 gap-3 md:gap-4 mb-6">
+                  <div class="bg-white p-4 rounded-xl border border-slate-200 text-center shadow-sm">
+                      <div class="text-xs text-slate-500 font-bold">សំណួរក្នុងជុំនេះ</div>
+                      <div id="res-total-q" class="text-xl md:text-2xl font-bold text-slate-800 mt-1">0</div>
+                  </div>
+                  <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 text-center shadow-sm">
+                      <div class="text-xs text-emerald-700 font-bold">ឆ្លើយត្រូវ (Correct)</div>
+                      <div id="res-correct-q" class="text-xl md:text-2xl font-bold text-emerald-700 mt-1">0</div>
+                  </div>
+                  <div class="bg-rose-50 p-4 rounded-xl border border-rose-200 text-center shadow-sm">
+                      <div class="text-xs text-rose-700 font-bold">ឆ្លើយខុស (Incorrect)</div>
+                      <div id="res-wrong-q" class="text-xl md:text-2xl font-bold text-rose-700 mt-1">0</div>
+                  </div>
+              </div>
+
+              <div id="wrong-questions-list" class="space-y-6"></div>
+
+              <div id="retry-wrong-btn-wrapper" class="mt-8 pt-6 border-t border-slate-300 text-center pb-12">
+                  <button onclick="retryWrongQuestionsOnly()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold py-3.5 px-10 rounded-xl shadow-lg text-base md:text-lg inline-flex items-center gap-2 transition-transform active:scale-95">
+                      <i class="fa-solid fa-rotate-right"></i> [ធ្វើសំនួរខុសឡើងវិញ]
+                  </button>
+              </div>
+          </div>
+      </div>
+  </div>
+
   <!-- INSTALL BANNER -->
   <div id="pwaBanner" class="pwa-install-banner">
     <div class="flex items-center gap-3 flex-1">
@@ -654,6 +706,10 @@
       <button id="pwaCloseBtn" class="text-slate-400 text-lg p-1"><i class="fa-solid fa-xmark"></i></button>
     </div>
   </div>
+
+
+
+
 
 <script>
 // =========================================================
@@ -845,6 +901,7 @@ async function forceLocalLogout(reasonMsg) {
   document.getElementById("modal-settings").classList.add("hidden");
   document.getElementById("modal-resume").classList.add("hidden");
   document.getElementById("modal-confirm").classList.add("hidden");
+  document.getElementById("modal-wrong-results").classList.add("hidden");
 
   document.getElementById("viewer").style.display = "none";
   document.getElementById("login-container").style.display = "flex";
@@ -1095,7 +1152,6 @@ const MODULE_KEYS = ['Basic', 'Medicine', 'Surgery', 'Gyneco', 'Pediatric'];
 let currentModuleData = [];
 let currentModuleName = 'Basic';
 
-// ការកំណត់ (Settings) ឥឡូវនេះរក្សាទុកតាមមុខវិជ្ជានីមួយៗ ដើម្បីកុំឲ្យបាត់ពេលប្តូរមុខវិជ្ជា
 let appSettings = {
     shuffleQuestions: true,
     shuffleAnswers: true,
@@ -1122,6 +1178,7 @@ function createEmptyModuleObj() {
 let appState = {
     activeModule: 'Basic',
     activeTab: 'lesson',
+    questionStats: {}, // កត់ត្រាចំនួនដងធ្វើត្រូវ និងធ្វើខុសលើសំណួរនីមួយៗ
     moduleData: {
         'Basic':     createEmptyModuleObj(),
         'Medicine':  createEmptyModuleObj(),
@@ -1192,7 +1249,6 @@ function initQuizApplication() {
     loadAppState();
     loadStudyPlan();
     
-    // ប្រសិនបើមានទិន្នន័យប្រឡងចាស់ដែលទើបផ្ទេរមក ឬមិនទាន់ចប់ ឲ្យលោតសួរ Resume នៅពេលចូលប្រឡង
     for (const mod in appState.moduleData) {
         if (hasUnfinishedSession(appState.moduleData[mod])) {
             appState.moduleData[mod].needsResumePrompt = true;
@@ -1202,7 +1258,6 @@ function initQuizApplication() {
     switchTab(appState.activeTab);
 }
 
-// អនុគមន៍ពិនិត្យមើលថាតើមុខវិជ្ជានេះមានសំណួរកំពុងធ្វើមិនទាន់ចប់ឬអត់
 function hasUnfinishedSession(mState) {
     if (!mState || !Array.isArray(mState.questions) || mState.questions.length === 0) return false;
     const gameAnsCount = Object.keys(mState.gameProgress || {}).length;
@@ -1259,7 +1314,6 @@ function switchModule(moduleName) {
     if (!appState.moduleData[moduleName]) appState.moduleData[moduleName] = createEmptyModuleObj();
     quizState = appState.moduleData[moduleName];
 
-    // បើមុខវិជ្ជាដែលប្តូរទៅមានសំណួរធ្វើមិនទាន់ចប់ ឲ្យវាលោតសួរ Resume
     if (hasUnfinishedSession(quizState)) {
         quizState.needsResumePrompt = true;
     }
@@ -1271,7 +1325,6 @@ function switchModule(moduleName) {
     let displayTitle = moduleName === 'ALL' ? 'មេរៀនរួមទាំងអស់ (All General Medicine)' : `មេរៀនផ្នែក ${moduleName}`;
     document.getElementById('lesson-title').innerText = displayTitle;
 
-    // ទាញយក Range ដែលធ្លាប់បានកំណត់សម្រាប់មុខវិជ្ជានេះ (មិនលុបត្រឡប់ទៅ 1 វិញទេ)
     applyModuleSavedRange(moduleName);
     updateSettingsUI();
     
@@ -1282,7 +1335,6 @@ function switchModule(moduleName) {
 function switchTab(tab) {
     if (!window.allModulesData) return;
     
-    // ប្រសិនបើចាកចេញពីផ្ទាំង Quiz ឬ Checklist ទៅមើលមេរៀន/ផែនការ ហើយមានសំណួរធ្វើមិនទាន់ចប់ កំណត់ឲ្យលោតសួរ Resume ពេលត្រឡប់មកវិញ
     if ((tab === 'lesson' || tab === 'plan') && hasUnfinishedSession(quizState)) {
         quizState.needsResumePrompt = true;
     }
@@ -1415,6 +1467,7 @@ function loadAppState() {
                 appState.activeModule = parsed.activeModule;
             }
             appState.activeTab = parsed.activeTab || 'lesson';
+            appState.questionStats = parsed.questionStats || {};
             for(const mod in appState.moduleData) {
                 if(parsed.moduleData && parsed.moduleData[mod]) {
                     appState.moduleData[mod] = { ...createEmptyModuleObj(), ...parsed.moduleData[mod] };
@@ -1615,7 +1668,7 @@ function renderQuiz() {
         if (roundMsg) {
             roundMsg.innerText = pct === 100 
                 ? "អបអរសាទរ! អ្នកធ្វើត្រូវ 100% ពេញលេញហើយ!" 
-                : `អ្នកសម្រេចបាន ${pct}%។ សូមចុចប៊ូតុងខាងក្រោមដើម្បី Repeat ជុំបន្ទាប់ឲ្យបានដល់ 100%!`;
+                : `អ្នកសម្រេចបាន ${pct}%។ សូមចុចប៊ូតុង «លទ្ធផល» ដើម្បីពិនិត្យសំណួរខុស ឬចុច Repeat ជុំបន្ទាប់ឲ្យបានដល់ 100%!`;
         }
         renderTracker();
         return;
@@ -1758,6 +1811,7 @@ function submitAnswer() {
     
     quizState.gameProgress[quizState.currentIndex] = { isCorrect, selectedText };
     recordDailyQuestionActivity();
+    recordQuestionHistoryStat(currentQ.id, isCorrect);
 
     const feedback = document.getElementById('quiz-feedback');
     feedback.classList.remove('hidden');
@@ -1948,6 +2002,7 @@ function checkChecklistAnswer(questionId) {
     
     quizState.checklistProgress[questionId] = { answered: true, isCorrect, selectedText };
     recordDailyQuestionActivity();
+    if (qObj) recordQuestionHistoryStat(qObj.id, isCorrect);
     saveAppState();
 
     const itemDiv = document.getElementById(`checklist-item-${questionId}`);
@@ -1993,6 +2048,176 @@ function updateChecklistTracker() {
     } else {
         document.getElementById('checklist-completed-message').classList.add('hidden');
     }
+}
+
+/* ========================================================= */
+/* មុខងារកត់ត្រាប្រវត្តិឆ្លើយត្រូវ/ខុស និងទំព័រលទ្ធផលសំណួរខុស         */
+/* ========================================================= */
+let currentReviewMode = 'quiz';
+
+function recordQuestionHistoryStat(qUniqueId, isCorrect) {
+    if (!qUniqueId) return;
+    if (!appState.questionStats) appState.questionStats = {};
+    if (!appState.questionStats[qUniqueId]) {
+        appState.questionStats[qUniqueId] = { correctCount: 0, wrongCount: 0 };
+    }
+    if (isCorrect) {
+        appState.questionStats[qUniqueId].correctCount += 1;
+    } else {
+        appState.questionStats[qUniqueId].wrongCount += 1;
+    }
+}
+
+function openWrongAnswersPage(mode = 'quiz') {
+    currentReviewMode = mode;
+    const modal = document.getElementById('modal-wrong-results');
+    const listContainer = document.getElementById('wrong-questions-list');
+    const retryWrapper = document.getElementById('retry-wrong-btn-wrapper');
+    listContainer.innerHTML = '';
+
+    const questions = quizState.questions || [];
+    let wrongItems = [];
+    let correctCount = 0;
+
+    questions.forEach((q, idx) => {
+        let ansData = (mode === 'quiz') ? quizState.gameProgress[idx] : quizState.checklistProgress[q.id];
+        if (ansData) {
+            if (ansData.isCorrect) {
+                correctCount++;
+            } else {
+                wrongItems.push({ questionObj: q, indexInRound: idx + 1, selectedText: ansData.selectedText });
+            }
+        }
+    });
+
+    document.getElementById('res-total-q').innerText = questions.length;
+    document.getElementById('res-correct-q').innerText = correctCount;
+    document.getElementById('res-wrong-q').innerText = wrongItems.length;
+    document.getElementById('wrong-page-subtitle').innerText = `ផ្នែក៖ ${currentModuleName} | អ្នកឆ្លើយខុសចំនួន ${wrongItems.length} សំណួរ ក្នុងចំណោម ${questions.length} សំណួរ`;
+
+    if (wrongItems.length === 0) {
+        listContainer.innerHTML = `
+            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-10 text-center">
+                <i class="fa-solid fa-circle-check text-5xl text-emerald-500 mb-3"></i>
+                <h3 class="text-xl font-bold text-emerald-800">អបអរសាទរ! អ្នកមិនមានសំណួរឆ្លើយខុសនោះទេ (ត្រូវ 100%)!</h3>
+            </div>
+        `;
+        retryWrapper.classList.add('hidden');
+    } else {
+        retryWrapper.classList.remove('hidden');
+        wrongItems.forEach((item, i) => {
+            const q = item.questionObj;
+            const correctOpt = q.options.find(o => o.isCorrect);
+            const correctText = correctOpt ? correctOpt.text : '';
+            
+            const stat = (appState.questionStats && appState.questionStats[q.id]) 
+                ? appState.questionStats[q.id] 
+                : { correctCount: 0, wrongCount: 1 };
+
+            let imageHtml = '';
+            if (q.image && String(q.image).trim() !== '') {
+                imageHtml = `<div class="my-3"><img src="${q.image}" alt="Question Image" class="max-w-full md:max-w-lg h-auto rounded-lg border border-slate-200"></div>`;
+            }
+
+            let noteHtml = '';
+            if (q.note) {
+                noteHtml = `<div class="mt-3 p-3 bg-amber-50 border-l-4 border-amber-500 text-slate-700 text-xs md:text-sm rounded-r-md"><strong>[បញ្ជាក់]៖</strong> ${q.note}</div>`;
+            }
+
+            const card = document.createElement('div');
+            card.className = 'bg-white border border-rose-200 rounded-xl p-5 shadow-sm relative';
+            card.innerHTML = `
+                <div class="flex flex-wrap justify-between items-center gap-2 mb-3 pb-2 border-b border-slate-100">
+                    <span class="bg-slate-100 text-slate-700 font-bold text-xs px-3 py-1 rounded-md">
+                        សំណួរទី ${item.indexInRound} ([${q.module || currentModuleName}] សំណួរដើមទី ${q.originalIndex})
+                    </span>
+                    <div class="flex items-center gap-2 text-xs font-bold">
+                        <span class="bg-rose-100 text-rose-700 px-2.5 py-1 rounded-full border border-rose-200">
+                            ✗ ធ្លាប់ធ្វើខុស៖ ${stat.wrongCount} ដង
+                        </span>
+                        <span class="bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200">
+                            ✓ ធ្លាប់ធ្វើត្រូវ៖ ${stat.correctCount} ដង
+                        </span>
+                    </div>
+                </div>
+
+                <h3 class="font-bold text-base md:text-lg text-slate-800 mb-3 leading-relaxed">
+                    ${i + 1}. ${q.question || '(សូមពិនិត្យមើលរូបភាពសំណួរខាងក្រោម)'}
+                </h3>
+                ${imageHtml}
+
+                <div class="space-y-2 mt-3 text-sm md:text-base">
+                    <div class="p-3 rounded-lg bg-rose-50 border-l-4 border-rose-500 text-rose-900 flex items-start gap-2">
+                        <span class="font-bold shrink-0">✗ ចម្លើយដែលអ្នកបានជ្រើសរើស៖</span>
+                        <span>${item.selectedText}</span>
+                    </div>
+                    <div class="p-3 rounded-lg bg-emerald-50 border-l-4 border-emerald-600 text-emerald-900 font-medium flex items-start gap-2">
+                        <span class="font-bold shrink-0">✓ ចម្លើយត្រឹមត្រូវ៖</span>
+                        <span>${correctText}</span>
+                    </div>
+                </div>
+                ${noteHtml}
+            `;
+            listContainer.appendChild(card);
+        });
+    }
+
+    modal.classList.remove('hidden');
+}
+
+function closeWrongAnswersPage() {
+    document.getElementById('modal-wrong-results').classList.add('hidden');
+}
+
+function retryWrongQuestionsOnly() {
+    const questions = quizState.questions || [];
+    let wrongQuestionsPool = [];
+
+    questions.forEach((q, idx) => {
+        let ansData = (currentReviewMode === 'quiz') ? quizState.gameProgress[idx] : quizState.checklistProgress[q.id];
+        if (ansData && !ansData.isCorrect) {
+            let newOptions = [...q.options];
+            if (appSettings.shuffleAnswers) newOptions = shuffleArray(newOptions);
+            wrongQuestionsPool.push({
+                ...q,
+                options: newOptions
+            });
+        }
+    });
+
+    if (wrongQuestionsPool.length === 0) {
+        closeWrongAnswersPage();
+        return;
+    }
+
+    if (appSettings.shuffleQuestions) {
+        wrongQuestionsPool = shuffleArray(wrongQuestionsPool);
+    }
+
+    if (autoNextTimeout) clearTimeout(autoNextTimeout);
+
+    appState.moduleData[currentModuleName] = {
+        questions: wrongQuestionsPool,
+        currentIndex: 0,
+        score: 0,
+        hasAnsweredCurrent: false,
+        mode: currentReviewMode,
+        checklistProgress: {},
+        gameProgress: {},
+        roundsCompleted: quizState.roundsCompleted || 0,
+        needsResumePrompt: false
+    };
+
+    quizState = appState.moduleData[currentModuleName];
+    saveAppState();
+    closeWrongAnswersPage();
+
+    if (currentReviewMode === 'quiz') {
+        renderQuiz();
+    } else {
+        renderChecklist();
+    }
+    updateTopStudyBanner();
 }
 
 /* ========================================================= */
@@ -2274,3 +2499,4 @@ document.addEventListener('fullscreenchange', () => {
 </script>
 </body>
 </html>
+    
