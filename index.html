@@ -6,7 +6,6 @@
     <title>កម្មវិធីត្រៀមប្រឡងថ្នាក់ជាតិ - វេជ្ជសាស្ត្រទូទៅ (General Medicine)</title>
     
     <script>
-      // បង្កើត Manifest សម្រាប់ PWA ដោយស្វ័យប្រវត្តិ
       const manifest = {
         name: "National General Medicine Quiz",
         short_name: "GM Quiz",
@@ -50,7 +49,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Firebase SDK សម្រាប់ជាស្ពានចម្លងទិន្នន័យស្វ័យប្រវត្តិនៅខាងក្រោយ (Invisible Relay Bridge) -->
+    <!-- Firebase SDK សម្រាប់ជាស្ពានចម្លងទិន្នន័យស្វ័យប្រវត្តិនៅខាងក្រោយ -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -225,12 +224,132 @@
       /* QUIZ APP SPECIFIC STYLES */
       .correct-answer-highlight { background-color: #d1fae5; border-left: 4px solid #059669; }
       .checklist-item { scroll-margin-top: 2rem; }
-      input:checked ~ #bg-toggle-q, input:checked ~ #bg-toggle-a, input:checked ~ #bg-toggle-auto, input:checked ~ #bg-toggle-cal-popup { background-color: #059669; }
-      input:checked ~ #dot-toggle-q, input:checked ~ #dot-toggle-a, input:checked ~ #dot-toggle-auto, input:checked ~ #dot-toggle-cal-popup { transform: translateX(1.25rem); }
+      input:checked ~ #bg-toggle-q, input:checked ~ #bg-toggle-a, input:checked ~ #bg-toggle-auto, input:checked ~ #bg-toggle-cal-popup, input:checked ~ #bg-toggle-batch { background-color: #059669; }
+      input:checked ~ #dot-toggle-q, input:checked ~ #dot-toggle-a, input:checked ~ #dot-toggle-auto, input:checked ~ #dot-toggle-cal-popup, input:checked ~ #dot-toggle-batch { transform: translateX(1.25rem); }
       .custom-scrollbar::-webkit-scrollbar { width: 6px; }
       .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
       .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
       .module-btn.active { background-color: #059669; color: white; border-color: #059669; }
+
+      /* ========================================================= */
+      /* 3D ANIMATED CHARGING BATTERY STYLES                       */
+      /* ========================================================= */
+      .battery-card-box {
+          background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+          border-radius: 20px;
+          padding: 18px 22px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 14px 30px rgba(2, 6, 23, 0.35), inset 0 1px 1px rgba(255,255,255,0.15);
+          border: 1px solid rgba(255,255,255,0.1);
+          position: relative;
+          overflow: hidden;
+      }
+      .battery-cap {
+          width: 44px;
+          height: 12px;
+          background: linear-gradient(90deg, #94a3b8 0%, #f8fafc 50%, #64748b 100%);
+          border-radius: 6px 6px 0 0;
+          margin-bottom: -2px;
+          z-index: 2;
+          box-shadow: 0 -2px 8px rgba(255,255,255,0.2);
+      }
+      .battery-shell {
+          width: 118px;
+          height: 205px;
+          background: linear-gradient(90deg, #0f172a 0%, #334155 32%, #1e293b 70%, #090d16 100%);
+          border: 3px solid rgba(226, 232, 240, 0.85);
+          border-radius: 18px;
+          padding: 7px;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          overflow: hidden;
+          transition: box-shadow 0.5s ease, border-color 0.5s ease;
+      }
+      /* ពន្លឺចាំងកញ្ចក់ពីមុខថ្ម (3D Cylinder Gloss) */
+      .battery-shell::before {
+          content: "";
+          position: absolute;
+          top: 0; bottom: 0; left: 16%; width: 22%;
+          background: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.18), rgba(255,255,255,0.02));
+          z-index: 6;
+          pointer-events: none;
+      }
+      /* ទឹកភ្លើងដែលកំពុងសាក (Liquid / Segmented Level) */
+      .battery-liquid {
+          width: 100%;
+          height: 0%;
+          border-radius: 11px;
+          position: relative;
+          transition: height 0.7s cubic-bezier(0.22, 1, 0.36, 1), background 0.5s ease, box-shadow 0.5s ease;
+          z-index: 2;
+          overflow: hidden;
+      }
+      /* ឆ្នូតកាំភ្លើងរត់ឡើងលើពេលកំពុងសាក (Animated Charging Bars) */
+      .battery-liquid::after {
+          content: "";
+          position: absolute;
+          inset: -40px 0 0 0;
+          background-image: repeating-linear-gradient(
+              0deg,
+              rgba(255, 255, 255, 0.28) 0px,
+              rgba(255, 255, 255, 0.28) 10px,
+              transparent 10px,
+              transparent 22px
+          );
+          animation: chargeBarsFlow 1.4s linear infinite;
+      }
+      /* ពពុះភ្លើងរត់ឡើងលើក្នុងថ្ម */
+      .battery-charging-wave {
+          position: absolute;
+          left: 0; right: 0; bottom: 0;
+          height: 100%;
+          background: linear-gradient(0deg, transparent 0%, rgba(255,255,255,0.45) 50%, transparent 100%);
+          background-size: 100% 60px;
+          animation: chargePulseUp 1.8s ease-in-out infinite;
+          z-index: 3;
+          pointer-events: none;
+      }
+      @keyframes chargeBarsFlow {
+          0% { transform: translateY(22px); }
+          100% { transform: translateY(0px); }
+      }
+      @keyframes chargePulseUp {
+          0% { transform: translateY(100%); opacity: 0; }
+          50% { opacity: 0.75; }
+          100% { transform: translateY(-100%); opacity: 0; }
+      }
+      /* រូបផ្លេកបន្ទោរសាកភ្លើងចំកណ្តាលថ្ម */
+      .battery-bolt-wrap {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          z-index: 8;
+          pointer-events: none;
+      }
+      .battery-bolt-svg {
+          width: 48px;
+          height: 68px;
+          animation: boltGlowPulse 1.5s infinite ease-in-out;
+      }
+      @keyframes boltGlowPulse {
+          0%, 100% { transform: scale(0.94); filter: drop-shadow(0 0 8px currentColor); opacity: 0.9; }
+          50% { transform: scale(1.08); filter: drop-shadow(0 0 18px currentColor); opacity: 1; }
+      }
+      .battery-pct-badge {
+          font-size: 1.45rem;
+          font-weight: 900;
+          color: #ffffff;
+          text-shadow: 0 2px 8px rgba(0,0,0,0.85);
+          margin-top: 2px;
+      }
     </style>
 </head>
 <body>
@@ -387,9 +506,12 @@
                 <!-- 2. Quiz Section -->
                 <div id="section-quiz" class="bg-white p-6 rounded-b-lg shadow-sm hidden">
                     <div class="flex flex-wrap justify-between items-center mb-6 border-b pb-4 gap-4">
-                        <div class="flex items-center gap-4">
+                        <div class="flex flex-wrap items-center gap-3">
                             <span id="question-tracker" class="font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-md shadow-inner">សំណួរទី 1</span>
                             <span id="score-tracker" class="font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-md border border-emerald-100 shadow-sm">ពិន្ទុ: 0</span>
+                            <span id="quiz-timer-display" class="hidden font-bold text-rose-600 bg-rose-50 px-3 py-1 rounded-md border border-rose-200 shadow-sm flex items-center gap-1.5">
+                                <i class="fa-regular fa-clock"></i> <span id="quiz-timer-text">00:00</span>
+                            </span>
                         </div>
                         <div class="flex gap-2">
                             <button onclick="openSettings()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-md text-sm font-bold border border-slate-200">កំណត់</button>
@@ -418,9 +540,9 @@
                         </div>
                     </div>
 
-                    <!-- ផ្ទាំងបញ្ចប់ការប្រឡងក្នុង Game Mode រួមជាមួយប៊ូតុង លទ្ធផល -->
+                    <!-- ផ្ទាំងបញ្ចប់ការប្រឡងក្នុង Game Mode -->
                     <div id="quiz-completed-area" class="hidden text-center py-10">
-                        <h2 class="text-3xl font-bold text-slate-800 mb-2">ការប្រឡងបានបញ្ចប់!</h2>
+                        <h2 id="quiz-completed-title" class="text-3xl font-bold text-slate-800 mb-2">ការប្រឡងបានបញ្ចប់!</h2>
                         <div class="text-5xl font-bold text-emerald-600 my-6" id="final-score-text"></div>
                         <p id="round-completion-msg" class="text-slate-600 mb-6 font-bold"></p>
                         <div class="flex flex-wrap justify-center gap-4">
@@ -429,6 +551,9 @@
                             </button>
                             <button onclick="forceRestart(true)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-lg shadow-md">
                                 ធ្វើតេស្តជុំបន្ទាប់ (Repeat Round)
+                            </button>
+                            <button id="btn-next-batch-quiz" onclick="startNextQuestionBatch()" class="hidden bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-8 rounded-lg shadow-md flex items-center gap-2">
+                                <i class="fa-solid fa-forward-step"></i> <span id="next-batch-text-quiz">ធ្វើ 20 សំណួរបន្តទៀត</span>
                             </button>
                         </div>
                     </div>
@@ -456,18 +581,21 @@
                             <button onclick="forceRestart(true)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-md">
                                 ធ្វើតេស្តជុំបន្ទាប់ (Repeat Round)
                             </button>
+                            <button id="btn-next-batch-chk" onclick="startNextQuestionBatch()" class="hidden bg-sky-600 hover:bg-sky-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-md flex items-center gap-2">
+                                <i class="fa-solid fa-forward-step"></i> <span id="next-batch-text-chk">ធ្វើ 20 សំណួរបន្តទៀត</span>
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- 4. Study Plan Section (ជាមួយប្រតិទិន និងប៊ូតុង Toggle ON/OFF Popup) -->
+                <!-- 4. Study Plan Section (ជាមួយប្រតិទិន និង រូបថ្មធំកំពុងសាកភ្លើងនៅខាងលើខាងស្តាំ) -->
                 <div id="section-plan" class="bg-white p-6 rounded-b-lg shadow-sm hidden">
                     <div class="border-b pb-4 mb-6 flex flex-wrap justify-between items-center gap-4">
                         <div>
                             <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
                                 <i class="fa-solid fa-bullseye text-rose-500"></i> ការកំណត់ផែនការរៀនសូត្រ & ប្រតិទិន (Study Planner & Calendar)
                             </h2>
-                            <p class="text-sm text-slate-500 mt-1">កំណត់កាលបរិច្ឆេទប្រឡង ឬចំនួនថ្ងៃ ដើម្បីបង្កើតប្រតិទិនសិក្សាប្រចាំថ្ងៃ និងបែងចែកសំណួរខកខានដោយស្វ័យប្រវត្តិ</p>
+                            <p class="text-sm text-slate-500 mt-1">កំណត់កាលបរិច្ឆេទប្រឡង ឬចំនួនថ្ងៃ ដើម្បីបង្កើតប្រតិទិនសិក្សាប្រចាំថ្ងៃ និងតាមដានថាមពលនៃការសិក្សា</p>
                         </div>
 
                         <!-- ប៊ូតុង Toggle ON/OFF សម្រាប់ Pop-up ប្រតិទិនពេល Login -->
@@ -483,68 +611,101 @@
                         </label>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-5 rounded-xl border border-slate-200 mb-6">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">១. ជ្រើសរើសរបៀបកំណត់ថ្ងៃ៖</label>
-                            <select id="plan-input-mode" onchange="togglePlanInputType()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white font-bold text-slate-700">
-                                <option value="date">កំណត់កាលបរិច្ឆេទប្រឡង (Exam Date)</option>
-                                <option value="days">កំណត់ចំនួនថ្ងៃរៀន (Number of Days)</option>
-                            </select>
+                    <!-- ផ្នែកខាងលើ៖ Form កំណត់ផែនការ (ខាងឆ្វេង) + រូបថ្មធំកំពុងសាកភ្លើង (ខាងលើខាងស្តាំ) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6 items-stretch">
+                        <!-- ខាងឆ្វេង៖ Form និង ស្ថិតិ ៤ ប្រអប់ -->
+                        <div class="lg:col-span-8 flex flex-col justify-between space-y-5">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-5 rounded-xl border border-slate-200">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">១. ជ្រើសរើសរបៀបកំណត់ថ្ងៃ៖</label>
+                                    <select id="plan-input-mode" onchange="togglePlanInputType()" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white font-bold text-slate-700">
+                                        <option value="date">កំណត់កាលបរិច្ឆេទប្រឡង (Exam Date)</option>
+                                        <option value="days">កំណត់ចំនួនថ្ងៃរៀន (Number of Days)</option>
+                                    </select>
+                                </div>
+
+                                <div id="plan-date-wrapper">
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">២. កាលបរិច្ឆេទប្រឡង៖</label>
+                                    <input type="date" id="plan-exam-date" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
+                                </div>
+
+                                <div id="plan-days-wrapper" class="hidden">
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">២. ចំនួនថ្ងៃត្រូវរៀនសរុប៖</label>
+                                    <input type="number" id="plan-total-days" min="1" max="365" value="30" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white" placeholder="ឧ. 30 ថ្ងៃ">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">៣. គោលដៅ Repeat សរុប (ដើម្បីចាំ ១០០%)៖</label>
+                                    <select id="plan-target-repeats" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white font-bold text-emerald-700">
+                                        <option value="3">៣ ដង (កម្រិតមូលដ្ឋាន - ងាយចាំ)</option>
+                                        <option value="4" selected>៤ ដង (កម្រិតណែនាំ - អត្រាត្រូវខ្ពស់ ~៩៥%)</option>
+                                        <option value="5">៥ ដង (កម្រិតច្បាស់លាស់ - ១០០% Mastery)</option>
+                                    </select>
+                                </div>
+
+                                <div class="md:col-span-3 flex flex-wrap justify-between items-center gap-3 pt-2 border-t border-slate-200 mt-1">
+                                    <button onclick="openCalendarPopupManual()" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold py-2 px-4 rounded-lg text-xs md:text-sm flex items-center gap-2">
+                                        <i class="fa-solid fa-eye text-sky-600"></i> មើលគំរូ Pop-up ប្រតិទិន
+                                    </button>
+                                    <button onclick="calculateAndSaveStudyPlan()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-md text-sm flex items-center gap-2">
+                                        <i class="fa-solid fa-calculator"></i> បង្កើត និងរក្សាទុកផែនការ (Generate Plan)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- ប្រអប់ស្ថិតិ ៤ -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <div class="bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl text-center">
+                                    <div class="text-xs text-emerald-700 font-bold">ពេលវេលានៅសល់</div>
+                                    <div id="stat-days-left" class="text-xl font-bold text-emerald-900 mt-1">0 ថ្ងៃ</div>
+                                    <div id="stat-exam-date-label" class="text-[11px] text-emerald-600 mt-0.5">-</div>
+                                </div>
+                                <div class="bg-sky-50 border border-sky-200 p-3.5 rounded-xl text-center">
+                                    <div class="text-xs text-sky-700 font-bold">គោលដៅសំណួរថ្ងៃនេះ</div>
+                                    <div id="stat-daily-q" class="text-xl font-bold text-sky-900 mt-1">0 សំណួរ/ថ្ងៃ</div>
+                                    <div id="stat-total-q-pool" class="text-[11px] text-sky-600 mt-0.5">សំណួរសរុប៖ 0</div>
+                                </div>
+                                <div class="bg-amber-50 border border-amber-200 p-3.5 rounded-xl text-center">
+                                    <div class="text-xs text-amber-700 font-bold">សម្រេចបានថ្ងៃនេះ</div>
+                                    <div id="stat-today-done" class="text-xl font-bold text-amber-900 mt-1">0 / 0</div>
+                                    <div id="stat-today-percent" class="text-[11px] text-amber-700 mt-0.5">0% នៃផែនការថ្ងៃនេះ</div>
+                                </div>
+                                <div class="bg-purple-50 border border-purple-200 p-3.5 rounded-xl text-center">
+                                    <div class="text-xs text-purple-700 font-bold">អត្រាធ្វើត្រូវបច្ចុប្បន្ន</div>
+                                    <div id="stat-overall-acc" class="text-xl font-bold text-purple-900 mt-1">0%</div>
+                                    <div id="stat-repeat-advice-short" class="text-[11px] text-purple-700 mt-0.5">គោលដៅ៖ 100%</div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div id="plan-date-wrapper">
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">២. កាលបរិច្ឆេទប្រឡង៖</label>
-                            <input type="date" id="plan-exam-date" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
-                        </div>
-
-                        <div id="plan-days-wrapper" class="hidden">
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">២. ចំនួនថ្ងៃត្រូវរៀនសរុប៖</label>
-                            <input type="number" id="plan-total-days" min="1" max="365" value="30" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white" placeholder="ឧ. 30 ថ្ងៃ">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">៣. គោលដៅ Repeat សរុប (ដើម្បីចាំ ១០០%)៖</label>
-                            <select id="plan-target-repeats" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white font-bold text-emerald-700">
-                                <option value="3">៣ ដង (កម្រិតមូលដ្ឋាន - ងាយចាំ)</option>
-                                <option value="4" selected>៤ ដង (កម្រិតណែនាំ - អត្រាត្រូវខ្ពស់ ~៩៥%)</option>
-                                <option value="5">៥ ដង (កម្រិតច្បាស់លាស់ - ១០០% Mastery)</option>
-                            </select>
-                        </div>
-
-                        <div class="md:col-span-3 flex flex-wrap justify-between items-center gap-3 pt-2 border-t border-slate-200 mt-2">
-                            <button onclick="openCalendarPopupManual()" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold py-2 px-4 rounded-lg text-xs md:text-sm flex items-center gap-2">
-                                <i class="fa-solid fa-eye text-sky-600"></i> មើលគំរូ Pop-up ប្រតិទិន
-                            </button>
-                            <button onclick="calculateAndSaveStudyPlan()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-md text-sm flex items-center gap-2">
-                                <i class="fa-solid fa-calculator"></i> បង្កើត និងរក្សាទុកផែនការ (Generate Plan)
-                            </button>
+                        <!-- ខាងលើខាងស្តាំ៖ រូបថ្មធំកំពុងសាកភ្លើង (Large Animated Charging Battery) -->
+                        <div class="lg:col-span-4 flex">
+                            <div class="battery-card-box w-full">
+                                <div class="text-xs font-bold text-slate-300 mb-2 tracking-wide uppercase flex items-center gap-1.5">
+                                    <i class="fa-solid fa-bolt text-emerald-400"></i> ថាមពលសិក្សាថ្ងៃនេះ (Charging)
+                                </div>
+                                <div class="battery-cap"></div>
+                                <div id="plan-battery-shell" class="battery-shell">
+                                    <div class="battery-charging-wave"></div>
+                                    <div id="plan-battery-liquid" class="battery-liquid" style="height: 15%;"></div>
+                                    <div class="battery-bolt-wrap">
+                                        <svg id="plan-battery-bolt" class="battery-bolt-svg text-emerald-400" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/>
+                                        </svg>
+                                        <div id="plan-battery-pct" class="battery-pct-badge">0%</div>
+                                    </div>
+                                </div>
+                                <div id="plan-battery-round-badge" class="mt-3 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                    ជុំទី 1 (ស ➔ បៃតង)
+                                </div>
+                                <div id="plan-battery-subtext" class="text-[11px] text-slate-400 mt-1 text-center">
+                                    សំណួរថ្ងៃនេះ៖ 0 / 0
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <div id="plan-dashboard" class="space-y-6">
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-center">
-                                <div class="text-xs text-emerald-700 font-bold">ពេលវេលានៅសល់</div>
-                                <div id="stat-days-left" class="text-2xl font-bold text-emerald-900 mt-1">0 ថ្ងៃ</div>
-                                <div id="stat-exam-date-label" class="text-[11px] text-emerald-600 mt-0.5">-</div>
-                            </div>
-                            <div class="bg-sky-50 border border-sky-200 p-4 rounded-xl text-center">
-                                <div class="text-xs text-sky-700 font-bold">គោលដៅសំណួរថ្ងៃនេះ</div>
-                                <div id="stat-daily-q" class="text-2xl font-bold text-sky-900 mt-1">0 សំណួរ/ថ្ងៃ</div>
-                                <div id="stat-total-q-pool" class="text-[11px] text-sky-600 mt-0.5">សំណួរសរុប៖ 0</div>
-                            </div>
-                            <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl text-center">
-                                <div class="text-xs text-amber-700 font-bold">សម្រេចបានថ្ងៃនេះ</div>
-                                <div id="stat-today-done" class="text-2xl font-bold text-amber-900 mt-1">0 / 0</div>
-                                <div id="stat-today-percent" class="text-[11px] text-amber-700 mt-0.5">0% នៃផែនការថ្ងៃនេះ</div>
-                            </div>
-                            <div class="bg-purple-50 border border-purple-200 p-4 rounded-xl text-center">
-                                <div class="text-xs text-purple-700 font-bold">អត្រាធ្វើត្រូវបច្ចុប្បន្ន</div>
-                                <div id="stat-overall-acc" class="text-2xl font-bold text-purple-900 mt-1">0%</div>
-                                <div id="stat-repeat-advice-short" class="text-[11px] text-purple-700 mt-0.5">គោលដៅ៖ 100%</div>
-                            </div>
-                        </div>
-
                         <div class="bg-amber-50/80 border-l-4 border-amber-500 p-4 rounded-r-xl shadow-sm">
                             <h4 class="font-bold text-amber-900 text-sm md:text-base flex items-center gap-2 mb-1">
                                 <i class="fa-solid fa-lightbulb text-amber-600"></i> ដំបូន្មានដើម្បីទទួលបានអត្រាធ្វើត្រូវ ១០០% (Smart Repeat Recommendation)៖
@@ -598,7 +759,13 @@
     </div>
   </div>
 
-  <!-- ========================================================= -->
+
+
+
+
+
+
+    <!-- ========================================================= -->
   <!-- QUIZ MODALS (Settings, Resume, Confirm, Wrong, Calendar)  -->
   <!-- ========================================================= -->
   <div id="modal-settings" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex justify-center items-center z-[3000] p-4">
@@ -607,10 +774,11 @@
               <h3 class="font-bold text-lg text-slate-800">ការកំណត់ប្រឡង (Quiz Settings)</h3>
               <button onclick="closeSettings()" class="text-slate-400 hover:text-slate-700 bg-slate-200 rounded p-1">&times;</button>
           </div>
-          <div class="p-6 space-y-6 overflow-y-auto custom-scrollbar grow">
-              <div class="border-b pb-6">
-                  <div class="font-bold text-slate-800 mb-2">ជួរលេខសំណួរ (Question Range)</div>
-                  <div class="text-sm text-slate-500 mb-4">មានសរុប <span id="total-q-count" class="font-bold text-emerald-600">0</span> សំណួរក្នុងផ្នែកនេះ។</div>
+          <div class="p-6 space-y-5 overflow-y-auto custom-scrollbar grow">
+              <!-- ១. ជួរលេខសំណួរ (Question Range) -->
+              <div class="border-b pb-5">
+                  <div class="font-bold text-slate-800 mb-1">ជួរលេខសំណួរ (Question Range)</div>
+                  <div class="text-sm text-slate-500 mb-3">មានសរុប <span id="total-q-count" class="font-bold text-emerald-600">0</span> សំណួរក្នុងផ្នែកនេះ។</div>
                   <div class="flex items-center gap-4">
                       <div class="flex-1">
                           <label class="block text-xs font-bold text-slate-600 mb-1">ពី (From):</label>
@@ -623,6 +791,47 @@
                   </div>
                   <div id="range-error" class="text-red-500 text-xs mt-2 hidden bg-red-50 p-2 rounded">ជួរលេខមិនត្រឹមត្រូវទេ!</div>
               </div>
+
+              <!-- ២. កំណត់ចំនួនសំណួរលេខរៀងបន្តបន្ទាប់ស្វ័យប្រវត្តិ (Auto Sequential Batch) -->
+              <div class="border-b pb-5 bg-sky-50/60 p-3.5 rounded-lg border border-sky-100">
+                  <label class="flex items-center justify-between cursor-pointer mb-2">
+                      <div>
+                          <div class="font-bold text-slate-800 text-sm">Auto សំណួរលេខរៀងបន្តបន្ទាប់</div>
+                          <div class="text-xs text-slate-500">បែងចែកសំណួរធ្វើម្តងមួយកញ្ចប់បន្តគ្នា</div>
+                      </div>
+                      <div class="relative ml-4 shrink-0">
+                          <input type="checkbox" id="setting-auto-batch" onchange="onAutoBatchToggleChange()" class="sr-only">
+                          <div class="block bg-slate-300 w-11 h-6 rounded-full transition-colors" id="bg-toggle-batch"></div>
+                          <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform shadow" id="dot-toggle-batch"></div>
+                      </div>
+                  </label>
+                  <div class="flex items-center gap-3 mt-2">
+                      <label class="text-xs font-bold text-slate-700 shrink-0">ចំនួនសំណួរក្នុងមួយដង៖</label>
+                      <input type="number" id="setting-batch-size" min="1" value="20" oninput="onBatchSizeInput()" class="w-28 border border-slate-300 rounded-md px-3 py-1.5 text-sm font-bold text-sky-800 bg-white" placeholder="ឧ. 20">
+                  </div>
+              </div>
+
+              <!-- ៣. កំណត់ម៉ោងប្រឡង (Timer) -->
+              <div class="border-b pb-5">
+                  <div class="font-bold text-slate-800 text-sm mb-2"><i class="fa-regular fa-clock text-rose-500 mr-1"></i> កំណត់ម៉ោងប្រឡង (Timer)</div>
+                  <select id="setting-timer-mode" onchange="toggleCustomTimerInput()" class="w-full border border-slate-300 rounded-md px-3 py-2 text-sm bg-white font-bold text-slate-700">
+                      <option value="0">មិនកំណត់ម៉ោង (No Timer)</option>
+                      <option value="5">5 នាទី</option>
+                      <option value="10">10 នាទី</option>
+                      <option value="15">15 នាទី</option>
+                      <option value="20">20 នាទី</option>
+                      <option value="30">30 នាទី</option>
+                      <option value="45">45 នាទី</option>
+                      <option value="60">60 នាទី (1 ម៉ោង)</option>
+                      <option value="custom">បំពេញដោយខ្លួនឯង (Custom Minutes)...</option>
+                  </select>
+                  <div id="custom-timer-wrapper" class="hidden mt-2.5 flex items-center gap-2">
+                      <label class="text-xs font-bold text-slate-600 shrink-0">បំពេញចំនួននាទី៖</label>
+                      <input type="number" id="setting-timer-custom" min="1" max="300" value="25" class="w-full border border-slate-300 rounded-md px-3 py-1.5 text-sm font-bold text-rose-600" placeholder="ឧ. 25 នាទី">
+                  </div>
+              </div>
+
+              <!-- ៤. Toggles ផ្សេងៗ -->
               <label class="flex items-center justify-between cursor-pointer pb-4 border-b">
                   <div>
                       <div class="font-bold text-slate-800">Auto Next (Game Mode)</div>
@@ -726,28 +935,59 @@
       </div>
   </div>
 
-  <!-- POPUP MODAL: ប្រតិទិនក្រើនរំឭកប្រចាំថ្ងៃ (Toggleable Calendar Popup on Login) -->
+  <!-- POPUP MODAL: ប្រតិទិនក្រើនរំឭកប្រចាំថ្ងៃ + រូបថ្មកំពុងសាកភ្លើងនៅខាងស្តាំខាងលើចំហៀងប្រតិទិន -->
   <div id="modal-calendar-popup" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[4000] flex items-center justify-center p-4">
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-          <div class="bg-emerald-600 text-white px-6 py-4 flex justify-between items-center">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[92vh]">
+          <div class="bg-emerald-600 text-white px-6 py-4 flex justify-between items-center shrink-0">
               <h3 class="font-bold text-lg flex items-center gap-2">
                   <i class="fa-solid fa-calendar-check"></i> ក្រើនរំឭកប្រតិទិនផែនការសិក្សាប្រចាំថ្ងៃ
               </h3>
               <button onclick="closeCalendarPopup()" class="text-white/80 hover:text-white bg-emerald-700/50 rounded-lg px-2.5 py-1">&times;</button>
           </div>
-          <div class="p-6 overflow-y-auto custom-scrollbar grow space-y-4">
-              <div id="popup-plan-summary" class="bg-sky-50 border border-sky-200 p-4 rounded-xl text-sky-900 text-sm leading-relaxed"></div>
-              <div class="flex flex-wrap justify-between items-center gap-2">
-                  <span class="text-xs font-bold text-slate-600">កាលវិភាគប្រតិទិនរបស់អ្នក៖</span>
-                  <div class="flex items-center gap-2 text-[11px] font-bold text-slate-600">
-                      <span class="inline-block w-2.5 h-2.5 bg-emerald-500 rounded-sm"></span> រួចរាល់
-                      <span class="inline-block w-2.5 h-2.5 bg-sky-500 rounded-sm ml-1"></span> ថ្ងៃនេះ
-                      <span class="inline-block w-2.5 h-2.5 bg-rose-500 rounded-sm ml-1"></span> ខកខាន (ពណ៌ក្រហម)
+          <div class="p-6 overflow-y-auto custom-scrollbar grow">
+              <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                  <!-- ខាងឆ្វេង៖ សង្ខេបថ្ងៃនេះ និង ប្រតិទិន (Calendar) -->
+                  <div class="lg:col-span-8 space-y-4">
+                      <div id="popup-plan-summary" class="bg-sky-50 border border-sky-200 p-4 rounded-xl text-sky-900 text-sm leading-relaxed"></div>
+                      <div class="flex flex-wrap justify-between items-center gap-2">
+                          <span class="text-xs font-bold text-slate-700">កាលវិភាគប្រតិទិនរបស់អ្នក៖</span>
+                          <div class="flex items-center gap-2 text-[11px] font-bold text-slate-600">
+                              <span class="inline-block w-2.5 h-2.5 bg-emerald-500 rounded-sm"></span> រួចរាល់
+                              <span class="inline-block w-2.5 h-2.5 bg-sky-500 rounded-sm ml-1"></span> ថ្ងៃនេះ
+                              <span class="inline-block w-2.5 h-2.5 bg-rose-500 rounded-sm ml-1"></span> ខកខាន (ពណ៌ក្រហម)
+                          </div>
+                      </div>
+                      <div id="popup-calendar-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[300px] overflow-y-auto custom-scrollbar pr-1"></div>
+                  </div>
+
+                  <!-- ខាងស្តាំខាងលើ ចំហៀង Calendar៖ រូបថ្មធំកំពុងសាកភ្លើង -->
+                  <div class="lg:col-span-4 flex flex-col">
+                      <div class="battery-card-box w-full">
+                          <div class="text-xs font-bold text-slate-300 mb-2 tracking-wide uppercase flex items-center gap-1.5">
+                              <i class="fa-solid fa-bolt text-emerald-400"></i> ថាមពលសិក្សាថ្ងៃនេះ
+                          </div>
+                          <div class="battery-cap"></div>
+                          <div id="popup-battery-shell" class="battery-shell">
+                              <div class="battery-charging-wave"></div>
+                              <div id="popup-battery-liquid" class="battery-liquid" style="height: 15%;"></div>
+                              <div class="battery-bolt-wrap">
+                                  <svg id="popup-battery-bolt" class="battery-bolt-svg text-emerald-400" viewBox="0 0 24 24" fill="currentColor">
+                                      <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/>
+                                  </svg>
+                                  <div id="popup-battery-pct" class="battery-pct-badge">0%</div>
+                              </div>
+                          </div>
+                          <div id="popup-battery-round-badge" class="mt-3 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                              ជុំទី 1 (ស ➔ បៃតង)
+                          </div>
+                          <div id="popup-battery-subtext" class="text-[11px] text-slate-400 mt-1 text-center">
+                              សំណួរថ្ងៃនេះ៖ 0 / 0
+                          </div>
+                      </div>
                   </div>
               </div>
-              <div id="popup-calendar-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[340px] overflow-y-auto custom-scrollbar pr-1"></div>
           </div>
-          <div class="px-6 py-4 bg-slate-50 border-t flex flex-wrap justify-between items-center gap-3">
+          <div class="px-6 py-4 bg-slate-50 border-t flex flex-wrap justify-between items-center gap-3 shrink-0">
               <label class="flex items-center gap-2.5 cursor-pointer text-xs font-bold text-slate-700">
                   <input type="checkbox" id="popup-toggle-setting" onchange="togglePopupSetting(this)" class="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4" checked>
                   បើកបង្ហាញ Pop-up ក្រើនរំឭកនេះពេល Login (ON/OFF)
@@ -948,6 +1188,7 @@ window.addEventListener("beforeunload", () => {
 });
 
 async function forceLocalLogout(reasonMsg) {
+  stopQuizTimer();
   await pushDataToFirebaseBridge();
   sendLogoutRequestToBackend();
   localStorage.removeItem("session_token");
@@ -1215,8 +1456,15 @@ let appSettings = {
     autoNext: false,
     rangeStart: 1,
     rangeEnd: 100,
+    autoBatch: false,
+    batchSize: 20,
+    timerMode: "0",
+    timerCustomMinutes: 25,
+    timerMinutes: 0,
     perModuleRange: {} 
 };
+
+let quizTimerInterval = null;
 
 function createEmptyModuleObj() {
     return { 
@@ -1228,7 +1476,8 @@ function createEmptyModuleObj() {
         checklistProgress: {}, 
         gameProgress: {}, 
         roundsCompleted: 0,
-        needsResumePrompt: false 
+        needsResumePrompt: false,
+        remainingSeconds: 0
     };
 }
 
@@ -1315,7 +1564,6 @@ function initQuizApplication() {
     
     switchTab(appState.activeTab);
 
-    // បង្ហាញ Pop-up ប្រតិទិនក្រើនរំឭកដោយស្វ័យប្រវត្តិពេល Login ចូល (បើកំណត់ ON)
     setTimeout(() => {
         checkAndShowCalendarPopupOnLogin();
     }, 600);
@@ -1365,12 +1613,13 @@ function applyModuleSavedRange(moduleName) {
         appSettings.rangeEnd = savedRange.end;
     } else {
         appSettings.rangeStart = 1;
-        appSettings.rangeEnd = maxLen || 1;
+        appSettings.rangeEnd = appSettings.autoBatch ? Math.min(maxLen, appSettings.batchSize || 20) : (maxLen || 1);
     }
 }
 
 function switchModule(moduleName) {
     if (!window.allModulesData) return;
+    stopQuizTimer();
     currentModuleName = moduleName;
     currentModuleData = window.allModulesData[moduleName] || [];
     appState.activeModule = moduleName;
@@ -1400,6 +1649,7 @@ function switchTab(tab) {
     
     if ((tab === 'lesson' || tab === 'plan') && hasUnfinishedSession(quizState)) {
         quizState.needsResumePrompt = true;
+        stopQuizTimer();
     }
 
     appState.activeTab = tab;
@@ -1435,6 +1685,7 @@ function switchTab(tab) {
             renderQuiz();
         }
     } else if (tab === 'checklist') {
+        stopQuizTimer();
         quizState.mode = 'checklist';
         if (!quizState.questions || quizState.questions.length === 0) {
             forceRestart();
@@ -1449,6 +1700,27 @@ function switchTab(tab) {
         renderTracker();
     }
     updateTopStudyBanner();
+}
+
+function toggleCustomTimerInput() {
+    const mode = document.getElementById('setting-timer-mode').value;
+    const wrap = document.getElementById('custom-timer-wrapper');
+    if (mode === 'custom') wrap.classList.remove('hidden');
+    else wrap.classList.add('hidden');
+}
+
+function onAutoBatchToggleChange() {
+    const isChecked = document.getElementById('setting-auto-batch').checked;
+    if (isChecked) onBatchSizeInput();
+}
+
+function onBatchSizeInput() {
+    const isChecked = document.getElementById('setting-auto-batch').checked;
+    if (!isChecked) return;
+    const size = parseInt(document.getElementById('setting-batch-size').value) || 20;
+    const start = parseInt(document.getElementById('setting-range-start').value) || 1;
+    const maxLen = currentModuleData.length || 1;
+    document.getElementById('setting-range-end').value = Math.min(maxLen, start + size - 1);
 }
 
 function loadSettings() {
@@ -1468,13 +1740,28 @@ function updateSettingsUI() {
     document.getElementById('setting-auto-next').checked = appSettings.autoNext;
     document.getElementById('setting-range-start').value = appSettings.rangeStart;
     document.getElementById('setting-range-end').value = appSettings.rangeEnd;
+
+    document.getElementById('setting-auto-batch').checked = !!appSettings.autoBatch;
+    document.getElementById('setting-batch-size').value = appSettings.batchSize || 20;
+    document.getElementById('setting-timer-mode').value = appSettings.timerMode || "0";
+    document.getElementById('setting-timer-custom').value = appSettings.timerCustomMinutes || 25;
+    toggleCustomTimerInput();
 }
 
 function saveSettings() {
     let start = parseInt(document.getElementById('setting-range-start').value);
     let end = parseInt(document.getElementById('setting-range-end').value);
+    const autoBatch = document.getElementById('setting-auto-batch').checked;
+    const batchSize = Math.max(1, parseInt(document.getElementById('setting-batch-size').value) || 20);
+
+    if (autoBatch) {
+        if (isNaN(start) || start < 1 || start > currentModuleData.length) start = 1;
+        end = Math.min(currentModuleData.length, start + batchSize - 1);
+        document.getElementById('setting-range-start').value = start;
+        document.getElementById('setting-range-end').value = end;
+    }
+
     let errorEl = document.getElementById('range-error');
-    
     if (isNaN(start) || isNaN(end) || start < 1 || end > currentModuleData.length || start > end) {
         errorEl.classList.remove('hidden');
         return false;
@@ -1483,6 +1770,15 @@ function saveSettings() {
 
     appSettings.rangeStart = start;
     appSettings.rangeEnd = end;
+    appSettings.autoBatch = autoBatch;
+    appSettings.batchSize = batchSize;
+
+    const timerMode = document.getElementById('setting-timer-mode').value;
+    const customMin = Math.max(1, parseInt(document.getElementById('setting-timer-custom').value) || 15);
+    appSettings.timerMode = timerMode;
+    appSettings.timerCustomMinutes = customMin;
+    appSettings.timerMinutes = (timerMode === 'custom') ? customMin : (parseInt(timerMode) || 0);
+
     if (!appSettings.perModuleRange) appSettings.perModuleRange = {};
     appSettings.perModuleRange[currentModuleName] = { start: start, end: end };
 
@@ -1494,6 +1790,99 @@ function saveSettings() {
     localStorage.setItem(keys.settings, JSON.stringify(appSettings));
     scheduleAutoBridgePush();
     return true;
+}
+
+function stopQuizTimer() {
+    if (quizTimerInterval) {
+        clearInterval(quizTimerInterval);
+        quizTimerInterval = null;
+    }
+}
+
+function formatSecondsMMSS(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function startOrResumeQuizTimer() {
+    stopQuizTimer();
+    const timerBadge = document.getElementById('quiz-timer-display');
+    const timerText = document.getElementById('quiz-timer-text');
+    if (!timerBadge || !timerText) return;
+
+    const totalMins = appSettings.timerMinutes || 0;
+    if (totalMins <= 0 || appState.activeTab !== 'quiz' || !quizState.questions || quizState.currentIndex >= quizState.questions.length) {
+        timerBadge.classList.add('hidden');
+        return;
+    }
+
+    if (!quizState.remainingSeconds || quizState.remainingSeconds <= 0) {
+        quizState.remainingSeconds = totalMins * 60;
+    }
+
+    timerBadge.classList.remove('hidden');
+    timerText.innerText = formatSecondsMMSS(quizState.remainingSeconds);
+
+    quizTimerInterval = setInterval(() => {
+        if (appState.activeTab !== 'quiz' || !document.getElementById('modal-resume').classList.contains('hidden')) return;
+        quizState.remainingSeconds--;
+        if (quizState.remainingSeconds <= 0) {
+            quizState.remainingSeconds = 0;
+            stopQuizTimer();
+            quizState.currentIndex = quizState.questions.length;
+            quizState.roundsCompleted = (quizState.roundsCompleted || 0) + 1;
+            quizState.needsResumePrompt = false;
+            saveAppState();
+            renderQuiz(true);
+            return;
+        }
+        timerText.innerText = formatSecondsMMSS(quizState.remainingSeconds);
+    }, 1000);
+}
+
+function updateNextBatchButtonsUI() {
+    const btnQuiz = document.getElementById('btn-next-batch-quiz');
+    const txtQuiz = document.getElementById('next-batch-text-quiz');
+    const btnChk = document.getElementById('btn-next-batch-chk');
+    const txtChk = document.getElementById('next-batch-text-chk');
+    if (!btnQuiz || !btnChk) return;
+
+    const totalLen = currentModuleData.length || 0;
+    if (appSettings.autoBatch && totalLen > 0) {
+        const size = appSettings.batchSize || 20;
+        let nextStart = appSettings.rangeEnd + 1;
+        if (nextStart > totalLen) nextStart = 1;
+        const nextEnd = Math.min(totalLen, nextStart + size - 1);
+        const count = nextEnd - nextStart + 1;
+        const label = `ធ្វើ ${count} សំណួរបន្តទៀត (${nextStart} - ${nextEnd})`;
+
+        txtQuiz.innerText = label;
+        txtChk.innerText = label;
+        btnQuiz.classList.remove('hidden');
+        btnChk.classList.remove('hidden');
+    } else {
+        btnQuiz.classList.add('hidden');
+        btnChk.classList.add('hidden');
+    }
+}
+
+function startNextQuestionBatch() {
+    const totalLen = currentModuleData.length || 1;
+    const size = appSettings.batchSize || 20;
+    let nextStart = appSettings.rangeEnd + 1;
+    if (nextStart > totalLen) nextStart = 1;
+    let nextEnd = Math.min(totalLen, nextStart + size - 1);
+
+    appSettings.rangeStart = nextStart;
+    appSettings.rangeEnd = nextEnd;
+    if (!appSettings.perModuleRange) appSettings.perModuleRange = {};
+    appSettings.perModuleRange[currentModuleName] = { start: nextStart, end: nextEnd };
+
+    const keys = getUserStorageKeys();
+    localStorage.setItem(keys.settings, JSON.stringify(appSettings));
+    updateSettingsUI();
+    forceRestart(false);
 }
 
 function openSettings() {
@@ -1586,6 +1975,7 @@ function closeResumeModal() { document.getElementById('modal-resume').classList.
 
 function forceRestart(isNextRound = false) {
     if(autoNextTimeout) clearTimeout(autoNextTimeout);
+    stopQuizTimer();
     const currentMode = quizState.mode || 'quiz';
     const prevRounds = quizState.roundsCompleted || 0;
     appState.moduleData[currentModuleName] = {
@@ -1597,7 +1987,8 @@ function forceRestart(isNextRound = false) {
         checklistProgress: {},
         gameProgress: {},
         roundsCompleted: isNextRound ? prevRounds + 1 : prevRounds,
-        needsResumePrompt: false
+        needsResumePrompt: false,
+        remainingSeconds: (appSettings.timerMinutes || 0) * 60
     };
     quizState = appState.moduleData[currentModuleName];
     saveAppState();
@@ -1712,7 +2103,7 @@ function renderTracker() {
     });
 }
 
-function renderQuiz() {
+function renderQuiz(isTimeUp = false) {
     if(autoNextTimeout) clearTimeout(autoNextTimeout);
 
     const activeArea = document.getElementById('quiz-active-area');
@@ -1721,9 +2112,13 @@ function renderQuiz() {
     const trackerS = document.getElementById('score-tracker');
 
     if (!quizState.questions || quizState.currentIndex >= quizState.questions.length || quizState.questions.length === 0) {
+        stopQuizTimer();
+        document.getElementById('quiz-timer-display')?.classList.add('hidden');
         activeArea.classList.add('hidden');
         completedArea.classList.remove('hidden');
         trackerQ.innerText = `បញ្ចប់ការប្រឡង`;
+        const titleEl = document.getElementById('quiz-completed-title');
+        if (titleEl) titleEl.innerText = isTimeUp ? "⏰ អស់ម៉ោងប្រឡងហើយ!" : "ការប្រឡងបានបញ្ចប់!";
         const total = quizState.questions ? quizState.questions.length : 0;
         const pct = total > 0 ? Math.round((quizState.score / total) * 100) : 0;
         document.getElementById('final-score-text').innerText = `${quizState.score} / ${total} (${pct}%)`;
@@ -1731,11 +2126,14 @@ function renderQuiz() {
         if (roundMsg) {
             roundMsg.innerText = pct === 100 
                 ? "អបអរសាទរ! អ្នកធ្វើត្រូវ 100% ពេញលេញហើយ!" 
-                : `អ្នកសម្រេចបាន ${pct}%។ សូមចុចប៊ូតុង «លទ្ធផល» ដើម្បីពិនិត្យសំណួរខុស ឬចុច Repeat ជុំបន្ទាប់ឲ្យបានដល់ 100%!`;
+                : `អ្នកសម្រេចបាន ${pct}%។ សូមចុចប៊ូតុង «លទ្ធផល» ដើម្បីពិនិត្យសំណួរខុស ឬចុចបន្តទៅសំណួរបន្ទាប់!`;
         }
+        updateNextBatchButtonsUI();
         renderTracker();
         return;
     }
+
+    startOrResumeQuizTimer();
 
     activeArea.classList.remove('hidden');
     completedArea.classList.add('hidden');
@@ -2107,6 +2505,7 @@ function updateChecklistTracker() {
         quizState.roundsCompleted = (quizState.roundsCompleted || 0) + 1;
         quizState.needsResumePrompt = false;
         saveAppState();
+        updateNextBatchButtonsUI();
         document.getElementById('checklist-completed-message').classList.remove('hidden');
     } else {
         document.getElementById('checklist-completed-message').classList.add('hidden');
@@ -2258,6 +2657,7 @@ function retryWrongQuestionsOnly() {
     }
 
     if (autoNextTimeout) clearTimeout(autoNextTimeout);
+    stopQuizTimer();
 
     appState.moduleData[currentModuleName] = {
         questions: wrongQuestionsPool,
@@ -2268,7 +2668,8 @@ function retryWrongQuestionsOnly() {
         checklistProgress: {},
         gameProgress: {},
         roundsCompleted: quizState.roundsCompleted || 0,
-        needsResumePrompt: false
+        needsResumePrompt: false,
+        remainingSeconds: (appSettings.timerMinutes || 0) * 60
     };
 
     quizState = appState.moduleData[currentModuleName];
@@ -2284,7 +2685,7 @@ function retryWrongQuestionsOnly() {
 }
 
 /* ========================================================= */
-/* ផ្នែកទី ២.១៖ STUDY PLANNER, CALENDAR & POPUP REMINDER      */
+/* ផ្នែកទី ២.១៖ STUDY PLANNER, CALENDAR & CHARGING BATTERY     */
 /* ========================================================= */
 function getTodayKey() {
     const d = new Date();
@@ -2369,7 +2770,87 @@ function getRemainingDays() {
     return studyPlan.totalDays || 30;
 }
 
-// បង្កើតទិន្នន័យប្រតិទិនប្រចាំថ្ងៃ រួមទាំងការបែងចែកសំណួរដែលខកខានមិនបានធ្វើទៅថ្ងៃបន្ទាប់ដោយស្វ័យប្រវត្តិ (Redistribution)
+// មុខងារគណនា និងធ្វើបច្ចុប្បន្នភាពរូបថ្មកំពុងសាកភ្លើង (Animated Charging Battery) ទាំងក្នុង Plan និងក្នុង Popup
+function updateChargingBatteriesUI(todayDone, dailyTarget) {
+    const totalPool = (window.allModulesData && window.allModulesData['ALL']) ? window.allModulesData['ALL'].length : 0;
+    const daysLeft = getRemainingDays();
+    const firstPassDaily = daysLeft > 0 ? Math.max(1, Math.ceil(totalPool / daysLeft)) : Math.max(1, totalPool);
+
+    // គណនាភាគរយសាកថ្មថ្ងៃនេះ និងជុំ (Round 1 ឬ Round 2+)
+    const rawPct = dailyTarget > 0 ? Math.round((todayDone / dailyTarget) * 100) : 0;
+    const displayPct = Math.min(100, Math.max(0, rawPct));
+    const visualHeight = Math.max(8, displayPct); // ឲ្យឃើញទឹកភ្លើងតិចៗទោះបី 0%
+
+    // កំណត់ថាជាជុំទី 1 ឬជុំទី 2+ (ផ្អែកលើចំនួនជុំដែលបានធ្វើ ឬចំនួនសំណួរថ្ងៃនេះធៀបនឹង First Pass)
+    let maxRoundsDone = 0;
+    MODULE_KEYS.forEach(k => {
+        const r = (appState.moduleData[k] && appState.moduleData[k].roundsCompleted) ? appState.moduleData[k].roundsCompleted : 0;
+        if (r > maxRoundsDone) maxRoundsDone = r;
+    });
+    const currentRoundNum = (maxRoundsDone >= 1 || todayDone > firstPassDaily) ? Math.max(2, maxRoundsDone + 1) : 1;
+
+    let liquidGradient = "";
+    let glowShadow = "";
+    let boltColorClass = "";
+    let roundLabel = "";
+    let roundBadgeStyle = "";
+
+    if (displayPct < 30) {
+        // ក្រោម 30%៖ ពណ៌ក្រហមភ្លឺ (Red Warning Charging)
+        liquidGradient = "linear-gradient(180deg, #fca5a5 0%, #ef4444 45%, #991b1b 100%)";
+        glowShadow = "0 0 25px rgba(239, 68, 68, 0.75), inset 0 0 15px rgba(254, 202, 202, 0.5)";
+        boltColorClass = "battery-bolt-svg text-rose-400";
+        roundLabel = `ក្រោម 30% (ពណ៌ក្រហម - ជុំទី ${currentRoundNum})`;
+        roundBadgeStyle = "mt-3 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40";
+    } else if (currentRoundNum === 1) {
+        // ជុំទី 1 (>= 30%)៖ ពណ៌សភ្លឺ ឡើងទៅបៃតងខ្ចី (White to Bright Green)
+        liquidGradient = "linear-gradient(180deg, #ffffff 0%, #bbf7d0 30%, #4ade80 70%, #22c55e 100%)";
+        glowShadow = "0 0 25px rgba(74, 222, 128, 0.75), inset 0 0 15px rgba(255, 255, 255, 0.8)";
+        boltColorClass = "battery-bolt-svg text-lime-300";
+        roundLabel = "ជុំទី 1 (ពណ៌ស ➔ បៃតង)";
+        roundBadgeStyle = "mt-3 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-200 border border-emerald-400/40";
+    } else {
+        // ជុំទី 2+ (>= 30%)៖ ពណ៌បៃតងកាន់តែដិតខ្លាំងតាមភាគរយ (Deep Rich Emerald Green)
+        liquidGradient = "linear-gradient(180deg, #34d399 0%, #059669 40%, #065f46 80%, #064e3b 100%)";
+        glowShadow = "0 0 30px rgba(5, 150, 105, 0.95), inset 0 0 18px rgba(16, 185, 129, 0.75)";
+        boltColorClass = "battery-bolt-svg text-emerald-300";
+        roundLabel = `ជុំទី ${currentRoundNum} (បៃតងដិតខ្លាំងតាម %)`;
+        roundBadgeStyle = "mt-3 px-3 py-1 rounded-full text-xs font-bold bg-teal-500/30 text-teal-200 border border-teal-400/50";
+    }
+
+    const targets = ['plan', 'popup'];
+    targets.forEach(prefix => {
+        const shell = document.getElementById(`${prefix}-battery-shell`);
+        const liquid = document.getElementById(`${prefix}-battery-liquid`);
+        const bolt = document.getElementById(`${prefix}-battery-bolt`);
+        const pctEl = document.getElementById(`${prefix}-battery-pct`);
+        const badgeEl = document.getElementById(`${prefix}-battery-round-badge`);
+        const subEl = document.getElementById(`${prefix}-battery-subtext`);
+
+        if (liquid) {
+            liquid.style.height = `${visualHeight}%`;
+            liquid.style.background = liquidGradient;
+            liquid.style.boxShadow = glowShadow;
+        }
+        if (shell) {
+            shell.style.boxShadow = glowShadow;
+        }
+        if (bolt) {
+            bolt.setAttribute('class', boltColorClass);
+        }
+        if (pctEl) {
+            pctEl.innerText = `${displayPct}%`;
+        }
+        if (badgeEl) {
+            badgeEl.className = roundBadgeStyle;
+            badgeEl.innerText = roundLabel;
+        }
+        if (subEl) {
+            subEl.innerText = `សម្រេចបាន៖ ${todayDone} / ${dailyTarget} សំណួរ`;
+        }
+    });
+}
+
 function generateStudyCalendarData() {
     const totalPool = (window.allModulesData && window.allModulesData['ALL']) ? window.allModulesData['ALL'].length : 0;
     const targetRepeats = studyPlan.targetRepeats || 4;
@@ -2403,7 +2884,6 @@ function generateStudyCalendarData() {
         const dateStr = formatDateYMD(currDate);
         const daysRemainingFromHere = totalDays - i;
         
-        // គណនាចំនួនសំណួរត្រូវធ្វើក្នុងថ្ងៃនេះ (បូកបញ្ចូលទាំងសំណួរដែលសល់ពីថ្ងៃមុនៗដោយស្វ័យប្រវត្តិ)
         const dailyTargetForThisDay = daysRemainingFromHere > 0 
             ? Math.ceil(remainingQuestionsToAllocate / daysRemainingFromHere) 
             : remainingQuestionsToAllocate;
@@ -2416,9 +2896,8 @@ function generateStudyCalendarData() {
             if (doneCount >= dailyTargetForThisDay && dailyTargetForThisDay > 0) {
                 status = 'completed';
             } else {
-                status = 'missed'; // ថ្ងៃដែលមិនបានធ្វើ ឬធ្វើមិនគ្រប់ (ដាក់ពណ៌ក្រហម និងបែងចែកសំណួរសល់ទៅថ្ងៃបន្ទាប់)
+                status = 'missed';
             }
-            // កាត់តែចំនួនសំណួរដែលបានធ្វើរួចចេញពីចំនួនសរុប ដូច្នេះសំណួរដែលមិនបានធ្វើនឹងត្រូវបែងចែកទៅថ្ងៃបន្ទាប់ដោយស្វ័យប្រវត្តិ
             remainingQuestionsToAllocate = Math.max(0, remainingQuestionsToAllocate - doneCount);
         } else if (dateStr === todayKey) {
             status = (doneCount >= dailyTargetForThisDay && dailyTargetForThisDay > 0) ? 'completed' : 'today';
@@ -2467,7 +2946,6 @@ function renderStudyCalendarUI() {
             badgeText = "✓ សម្រេចរួចរាល់";
             badgeStyle = "bg-emerald-600 text-white";
         } else if (item.status === 'missed') {
-            // ដាក់ពណ៌ក្រហមសម្រាប់ថ្ងៃដែលមិនបានធ្វើ ឬធ្វើមិនគ្រប់
             cardStyle = "bg-rose-50 border-rose-400 text-rose-900 shadow-sm";
             badgeText = item.done === 0 ? "✗ មិនបានធ្វើ (បែងចែកឡើងវិញ)" : `✗ ខ្វះ ${item.notDone} សំណួរ (បែងចែកឡើងវិញ)`;
             badgeStyle = "bg-rose-600 text-white";
@@ -2535,6 +3013,7 @@ function openCalendarPopupManual() {
             </div>
             ${missedDaysCount > 0 ? `<div class="mt-2.5 text-xs text-rose-600 font-bold bg-rose-50 px-3 py-1.5 rounded-lg border border-rose-200">⚠️ អ្នកមានថ្ងៃដែលមិនបានធ្វើចំនួន ${missedDaysCount} ថ្ងៃ (ពណ៌ក្រហម) ហើយសំណួរដែលនៅសល់ត្រូវបានបែងចែកបញ្ចូលក្នុងថ្ងៃបន្ទាប់រួចរាល់។</div>` : ''}
         `;
+        updateChargingBatteriesUI(todayItem.done, todayItem.target);
     }
 
     renderStudyCalendarUI();
@@ -2642,6 +3121,8 @@ function renderStudyPlanDashboard() {
     const todayDone = (studyPlan.dailyLog && studyPlan.dailyLog[todayKey]) ? studyPlan.dailyLog[todayKey] : 0;
     const todayPct = dailyTarget > 0 ? Math.min(100, Math.round((todayDone / dailyTarget) * 100)) : 0;
 
+    updateChargingBatteriesUI(todayDone, dailyTarget);
+
     let totalAnsAll = 0;
     let totalCorAll = 0;
     const tbody = document.getElementById('plan-module-table-body');
@@ -2720,6 +3201,8 @@ function updateTopStudyBanner() {
     const totalPool = window.allModulesData['ALL'].length;
     const dailyTarget = todayCalObj ? todayCalObj.target : (daysLeft > 0 ? Math.ceil((totalPool * (studyPlan.targetRepeats || 4)) / daysLeft) : totalPool);
     const todayDone = (studyPlan.dailyLog && studyPlan.dailyLog[todayKey]) ? studyPlan.dailyLog[todayKey] : 0;
+
+    updateChargingBatteriesUI(todayDone, dailyTarget);
 
     let totalAnsAll = 0, totalCorAll = 0;
     MODULE_KEYS.forEach(k => {
